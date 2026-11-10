@@ -39,6 +39,7 @@ class BaseConfig:
     # --- UI -------------------------------------------------------
     APP_NAME = "SkyBook"
     APP_TAGLINE = "Book Flights Seamlessly Across the Globe"
+    SUPPORT_EMAIL = os.getenv("SUPPORT_EMAIL", "shoaibmeermd@gmail.com")
 
 
 class DevelopmentConfig(BaseConfig):
