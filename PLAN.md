@@ -129,4 +129,14 @@ All phases above are implemented and verified against MySQL/MariaDB 10.4.
 - **Test Suite Expansion**: Added admin route tests, edge cases (seat limits, weak passwords, expired holds during checkout, duplicate emails), expanding passing test count from 32 to 40.
 - **Version Control**: Git repository initialized and published to GitHub `meer-md-shoaib/SkyBook`.
 
+**UX, Architecture & UI Enhancements (2026-11-10)**
+
+- **City Dropdown Bug Fix**: Resolved empty `<select>` dropdowns on flight search by returning rich airport objects with `city` and `airport_code` attributes from `FlightService.cities()`.
+- **Seat Map Click Fix**: Fixed event delegation mismatch in `main.js` and `seat.html` where `data-status` was queried but `data-seat-status` was set, allowing seamless interactive seat selection.
+- **Page Separation (Multi-Page Architecture)**: Deconstructed the long single-scroll index into dedicated standalone pages (`/services` for passenger amenities and `/contact` with interactive inquiry form), streamlining the landing page.
+- **Support Contact Standardization**: Updated all customer support touchpoints (UI footer, dedicated contact view, configuration defaults, and e-ticket PDF generation) to `shoaibmeermd@gmail.com`.
+- **Full Dark Theme System**: Implemented dark theme CSS custom properties, styled surfaces/cards/modals/forms/seat-map, added theme toggle switch in navbar with `localStorage` persistence and OS `prefers-color-scheme` synchronization.
+- **Test Suite Coverage**: Added test coverage for standalone `/services` and `/contact` GET/POST endpoints (now 42 tests).
+- **Atomic Commits**: Structured and committed changes across ~20 atomic commits pushed to GitHub `meer-md-shoaib/SkyBook`.
+
 **Not included:** UI screenshots.
