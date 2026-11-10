@@ -405,7 +405,14 @@ def passengers():
 @login_required
 @admin_required
 def payments():
-    rows = Payment.query.order_by(Payment.created_at.desc()).limit(200).all()
+    rows = (
+        Payment.query.options(
+            joinedload(Payment.booking).joinedload(Booking.user)
+        )
+        .order_by(Payment.created_at.desc())
+        .limit(200)
+        .all()
+    )
     totals = {
         "success": Payment.query.filter_by(payment_status="SUCCESS").count(),
         "failed": Payment.query.filter_by(payment_status="FAILED").count(),
@@ -425,6 +432,11 @@ def payments():
 @admin_required
 def cancellations():
     rows = (
-        Cancellation.query.order_by(Cancellation.cancellation_date.desc()).limit(100).all()
+        Cancellation.query.options(
+            joinedload(Cancellation.booking).joinedload(Booking.user)
+        )
+        .order_by(Cancellation.cancellation_date.desc())
+        .limit(100)
+        .all()
     )
     return render_template("admin/cancellations.html", cancellations=rows)
