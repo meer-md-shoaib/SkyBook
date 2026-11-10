@@ -43,8 +43,8 @@
               <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.dashboard') }}">Admin</a></li>
             {% endif %}
           {% endif %}
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}#services">Services</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}#contact">Contact</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.services') }}">Services</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.contact') }}">Contact</a></li>
         </ul>
 
         <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
@@ -101,7 +101,7 @@
   {% block content %}{% endblock %}
 </main>
 
-<footer class="site-footer" id="contact">
+<footer class="site-footer">
   <div class="container">
     <div class="row g-4">
       <div class="col-lg-4">
@@ -122,13 +122,14 @@
       <div class="col-6 col-lg-2">
         <h5>Explore</h5>
         <a href="{{ url_for('main.index') }}#search">Search flights</a><br>
-        <a href="{{ url_for('main.index') }}#services">Services</a><br>
+        <a href="{{ url_for('main.services') }}">Services</a><br>
+        <a href="{{ url_for('main.contact') }}">Contact us</a><br>
         <a href="{{ url_for('bookings.my_bookings') }}">Manage booking</a><br>
         <a href="{{ url_for('auth.register') }}">Create account</a>
       </div>
       <div class="col-6 col-lg-3">
         <h5>Support</h5>
-        <a href="mailto:support@skybook.example">support@skybook.example</a><br>
+        <a href="mailto:shoaibmeermd@gmail.com">shoaibmeermd@gmail.com</a><br>
         <a href="tel:+911800123456">1800 123 456 (toll free)</a><br>
         <span style="font-size:.87rem">Mon–Sun · 24×7 assistance</span>
       </div>
