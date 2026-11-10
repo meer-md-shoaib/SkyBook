@@ -34,19 +34,23 @@
         <div class="search-grid">
           <div class="search-field">
             <label for="source">From</label>
-            <select id="source" name="source" required>
+            <select id="source" name="source" class="form-select" required>
               <option value="" disabled selected>Select departure</option>
               {% for city in cities %}
-                <option value="{{ city.city }}">{{ city.city }} ({{ city.airport_code }})</option>
+                <option value="{{ city.city if city.city is defined else city }}">
+                  {{ city.city if city.city is defined else city }}{% if city.airport_code is defined %} ({{ city.airport_code }}){% endif %}
+                </option>
               {% endfor %}
             </select>
           </div>
           <div class="search-field">
             <label for="destination">To</label>
-            <select id="destination" name="destination" required>
+            <select id="destination" name="destination" class="form-select" required>
               <option value="" disabled selected>Select destination</option>
               {% for city in cities %}
-                <option value="{{ city.city }}">{{ city.city }} ({{ city.airport_code }})</option>
+                <option value="{{ city.city if city.city is defined else city }}">
+                  {{ city.city if city.city is defined else city }}{% if city.airport_code is defined %} ({{ city.airport_code }}){% endif %}
+                </option>
               {% endfor %}
             </select>
           </div>
