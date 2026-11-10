@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Services & Amenities · SkyBook{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <div class="crumbs mb-2">
+      <a href="{{ url_for('main.index') }}">Home</a> <span class="mx-1">/</span>
+      <span>Services</span>
+    </div>
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3">
+      <div>
+        <h1 style="font-size:2.2rem;margin-bottom:0.4rem">Travel Services Built Around You</h1>
+        <div class="text-muted-2" style="font-size:1rem;max-width:650px">
+          From live seat selection and atomic booking holds to instant PDF e-ticketing and self-service cancellations.
+        </div>
+      </div>
+      <div>
+        <a href="{{ url_for('main.index') }}#search" class="btn btn-sky">Book a flight</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container py-5">
+  <div class="section-eyebrow mb-2">Core Capabilities</div>
+  <h2 class="mb-4" style="font-size:1.6rem">End-to-End Passenger Services</h2>
+
+  <div class="row g-4 mb-5">
+    <div class="col-md-4">
+      <div class="surface surface-pad h-100 hover-lift">
+        <div class="tile-icon mb-3">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M21 4 13.6 11l-4.4-.9-2.6 1.8 6.1 1.7.9 5.3 1.6-.9.8-3.6L22 7.3z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h4 style="font-size:1.2rem;margin-bottom:0.5rem">Live Flight Search</h4>
+        <p class="text-muted-2" style="font-size:0.9rem">
+          Search domestic and international routes across premier airlines with live departure windows, fare ceilings, and direct flight filters.
+        </p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="surface surface-pad h-100 hover-lift">
+        <div class="tile-icon mb-3">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="3" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="9" r="2" fill="currentColor"/><circle cx="15" cy="9" r="2" fill="currentColor"/><path d="M7 16h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h4 style="font-size:1.2rem;margin-bottom:0.5rem">Interactive Seat Selection</h4>
+        <p class="text-muted-2" style="font-size:0.9rem">
+          Visual interactive cabin maps for Airbus A320 and Boeing 737 aircraft. Choose aisle, window, or extra-legroom seats with real-time locking.
+        </p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="surface surface-pad h-100 hover-lift">
+        <div class="tile-icon mb-3">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h4 style="font-size:1.2rem;margin-bottom:0.5rem">Simulated Secure Checkout</h4>
+        <p class="text-muted-2" style="font-size:0.9rem">
+          Test payments via credit/debit card, UPI, and net banking with simulated bank authorization, failure recovery, and duplicate payment protection.
+        </p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="surface surface-pad h-100 hover-lift">
+        <div class="tile-icon mb-3">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h4 style="font-size:1.2rem;margin-bottom:0.5rem">Automated E-Ticketing</h4>
+        <p class="text-muted-2" style="font-size:0.9rem">
+          Instant PDF boarding pass and e-ticket generation powered by ReportLab with unique PNR reference, barcode representation, and passenger manifest.
+        </p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="surface surface-pad h-100 hover-lift">
+        <div class="tile-icon mb-3">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M3 3v5h5M12 7v5l4 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h4 style="font-size:1.2rem;margin-bottom:0.5rem">Self-Service Cancellations</h4>
+        <p class="text-muted-2" style="font-size:0.9rem">
+          Cancel confirmed flights with transparent policy-based fee quotes. Seats are immediately released back to available inventory with refund tracking.
+        </p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="surface surface-pad h-100 hover-lift">
+        <div class="tile-icon mb-3">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <h4 style="font-size:1.2rem;margin-bottom:0.5rem">Passenger Group Bookings</h4>
+        <p class="text-muted-2" style="font-size:0.9rem">
+          Book up to 6 seats in a single atomic transaction. Enter individualized passenger names, dates of birth, and Aadhaar/Passport details.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="surface surface-pad mb-5" style="border-left:4px solid var(--sky)">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <h3 style="font-size:1.4rem;margin-bottom:0.4rem">Need custom itinerary support or urgent flight assistance?</h3>
+        <p class="text-muted-2 mb-lg-0" style="font-size:0.95rem">
+          Our passenger service team is available 24/7. Reach out directly to <strong>shoaibmeermd@gmail.com</strong>.
+        </p>
+      </div>
+      <div class="col-lg-4 text-lg-end">
+        <a href="{{ url_for('main.contact') }}" class="btn btn-sky">Contact support</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
