@@ -67,7 +67,7 @@ body {
   margin: 0;
   font-family: var(--font);
   color: var(--ink);
-  background: #f7fafd;
+  background: var(--bg-body);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -466,6 +466,51 @@ a:hover { color: var(--navy); }
 .section-eyebrow { font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sky-600); font-weight: 800; }
 
 .sticky-panel { position: sticky; top: 96px; }
+
+/* ----------------------------- dark theme: surfaces & cards ----------- */
+[data-theme="dark"] .site-header {
+  background: rgba(19, 29, 49, 0.94);
+  border-bottom-color: var(--line);
+}
+[data-theme="dark"] .brand-name { color: var(--navy); }
+[data-theme="dark"] .nav-links .nav-link { color: var(--navy); }
+[data-theme="dark"] .nav-links .nav-link:hover { background: var(--sky-50); color: var(--sky-400); }
+[data-theme="dark"] .btn-nav-ghost,
+[data-theme="dark"] .btn-ghost {
+  background: var(--bg-card);
+  color: var(--navy);
+  border-color: var(--line);
+}
+[data-theme="dark"] .btn-nav-ghost:hover,
+[data-theme="dark"] .btn-ghost:hover {
+  background: var(--sky-50);
+  border-color: var(--sky-400);
+}
+[data-theme="dark"] .dropdown-menu.skybook {
+  background: var(--bg-card);
+  border-color: var(--line);
+}
+[data-theme="dark"] .dropdown-menu.skybook .dropdown-item { color: var(--ink); }
+[data-theme="dark"] .dropdown-menu.skybook .dropdown-item:hover { background: var(--sky-50); color: var(--sky-400); }
+[data-theme="dark"] .surface,
+[data-theme="dark"] .search-card,
+[data-theme="dark"] .flight-card,
+[data-theme="dark"] .auth-card,
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .filter-card,
+[data-theme="dark"] .feature-card,
+[data-theme="dark"] .tile,
+[data-theme="dark"] .route-chip {
+  background: var(--bg-surface);
+  border-color: var(--line);
+}
+[data-theme="dark"] .tile:hover,
+[data-theme="dark"] .route-chip:hover,
+[data-theme="dark"] .flight-card:hover { border-color: var(--sky); }
+[data-theme="dark"] .page-head {
+  background: linear-gradient(180deg, #10192e 0%, #0b1120 100%);
+  border-bottom-color: var(--line);
+}
 
 /* ------------------------------ seat map ------------------------------- */
 .seat-map-panel { padding: 1.6rem 1.25rem; }
