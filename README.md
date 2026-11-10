@@ -18,6 +18,9 @@ flights, schedules, seat maps, bookings, passengers, payments and cancellations.
 - Simulated card/UPI payment, retry after decline, idempotent gateway callback
 - PDF e-ticket download (owner/admin only, confirmed bookings only)
 - Booking history, booking detail and cancellation with refund quote
+- Dedicated standalone pages: `/services` (amenities & cabin classes) and `/contact` (support ticketing)
+- Dark mode toggle switch with theme persistence (`localStorage`) and system preference sync
+- Official support channel: `shoaibmeermd@gmail.com`
 
 **Administrator**
 - Dashboard: bookings, revenue, upcoming flights, seat occupancy, recent activity
@@ -131,18 +134,12 @@ The suite runs against `skybook_test_db` (create it first if it does not exist):
 python -m pytest tests -q
 ```
 
-Latest result on this machine (MariaDB 10.4, Python 3.13):
-
-```
-32 passed in 121.00s
-```
-
 Coverage by module:
 
 | File | What it checks |
 | --- | --- |
-| `test_auth.py` | registration, login success/failure, role protection, logout |
-| `test_flights.py` | search results, no-route, same-city, past/invalid date, clamping |
+| `test_auth.py` | registration, login success/failure, role protection, logout, CSRF & password policy |
+| `test_flights.py` | search results, no-route, same-city, past/invalid date, clamping, standalone services & contact views |
 | `test_bookings.py` | seat hold, duplicate/already-held seats, passenger validation, hold expiry, ownership |
 | `test_payments.py` | decline keeps pending, retry, confirmation, ticket file, idempotency, callback |
 | `test_cancellations.py` | eligibility, refund math, seat release, double cancellation, confirmation prompt |
