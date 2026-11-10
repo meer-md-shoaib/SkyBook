@@ -512,6 +512,51 @@ a:hover { color: var(--navy); }
   border-bottom-color: var(--line);
 }
 
+/* ----------------------------- dark theme: buttons, badges, icons ------ */
+[data-theme="dark"] .btn-navy,
+[data-theme="dark"] .btn-nav-solid {
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(147, 197, 253, 0.35) !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+[data-theme="dark"] .btn-navy:hover,
+[data-theme="dark"] .btn-nav-solid:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5);
+  transform: translateY(-1px);
+}
+[data-theme="dark"] .btn-navy svg,
+[data-theme="dark"] .btn-nav-solid svg {
+  stroke: #ffffff !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .feature-card .num {
+  background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%) !important;
+  color: #93c5fd !important;
+  border: 1px solid rgba(147, 197, 253, 0.35) !important;
+  box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4);
+}
+
+[data-theme="dark"] .tile-icon {
+  background: rgba(56, 189, 248, 0.14) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+}
+
+[data-theme="dark"] .stat-icon {
+  background: rgba(56, 189, 248, 0.14) !important;
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .airline-badge {
+  background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  color: #ffffff;
+  border: 1px solid rgba(96, 165, 250, 0.3);
+}
+
 /* ----------------------------- dark theme: forms & controls ----------- */
 [data-theme="dark"] .form-control,
 [data-theme="dark"] .form-select {
@@ -688,4 +733,43 @@ a:hover { color: var(--navy); }
   .search-strip { gap: 1rem; }
   .time-pair { gap: 0.6rem; }
   .time-pair .t { font-size: 1.05rem; }
+}
+
+/* ------------------------ page transition animations ------------------- */
+.page-shell {
+  animation: pageSlideIn 0.36s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes pageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-exit {
+  animation: pageSlideOut 0.18s cubic-bezier(0.7, 0, 0.84, 0) forwards !important;
+}
+
+@keyframes pageSlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-shell, .page-exit {
+    animation: none !important;
+    transform: none !important;
+  }
 }

@@ -23,18 +23,53 @@ AIRPORTS = [
 
 # (flight_number, airline, source, destination, aircraft, departure hour, minute, duration mins, fare)
 ROUTES = [
+    # Bengaluru <-> Delhi (3 options each way)
     ("6E 204", "IndiGo", "BLR", "DEL", "Airbus A320neo", 6, 15, 165, 5499),
+    ("AI 502", "Air India", "BLR", "DEL", "Boeing 787-8", 11, 30, 160, 6199),
+    ("UK 812", "Vistara", "BLR", "DEL", "Airbus A321neo", 18, 45, 155, 5899),
+    ("6E 534", "IndiGo", "DEL", "BLR", "Airbus A320neo", 8, 30, 165, 5399),
+    ("AI 503", "Air India", "DEL", "BLR", "Boeing 787-8", 15, 20, 160, 6099),
+    ("UK 819", "Vistara", "DEL", "BLR", "Airbus A321neo", 20, 10, 155, 5999),
+
+    # Delhi <-> Mumbai (3 options each way)
     ("AI 505", "Air India", "DEL", "BOM", "Boeing 737 MAX", 8, 40, 130, 6299),
-    ("UK 945", "Vistara", "BOM", "BLR", "Airbus A320neo", 10, 5, 105, 4899),
-    ("SG 721", "SpiceJet", "HYD", "MAA", "Boeing 737-800", 12, 30, 80, 3199),
-    ("QP 1105", "Akasa Air", "COK", "BLR", "Boeing 737 MAX", 14, 20, 70, 2899),
-    ("6E 618", "IndiGo", "DEL", "HYD", "Airbus A320", 16, 0, 125, 4599),
-    ("AI 439", "Air India", "MAA", "DEL", "Airbus A321neo", 18, 10, 145, 5999),
-    ("UK 831", "Vistara", "BLR", "BOM", "Airbus A321neo", 19, 45, 100, 4699),
-    ("SG 305", "SpiceJet", "MAA", "HYD", "Boeing 737-800", 7, 25, 85, 2999),
-    ("6E 471", "IndiGo", "BLR", "COK", "Airbus A320", 21, 15, 65, 2699),
+    ("6E 2112", "IndiGo", "DEL", "BOM", "Airbus A320neo", 13, 15, 125, 5199),
+    ("UK 975", "Vistara", "DEL", "BOM", "Airbus A321neo", 17, 30, 125, 6599),
     ("AI 806", "Air India", "BOM", "DEL", "Boeing 787-8", 9, 0, 125, 6899),
+    ("6E 2445", "IndiGo", "BOM", "DEL", "Airbus A320", 14, 40, 130, 5299),
+    ("UK 996", "Vistara", "BOM", "DEL", "Airbus A321neo", 19, 15, 125, 6499),
+
+    # Mumbai <-> Bengaluru (3 options each way)
+    ("UK 945", "Vistara", "BOM", "BLR", "Airbus A320neo", 10, 5, 105, 4899),
+    ("6E 5184", "IndiGo", "BOM", "BLR", "Airbus A320", 14, 50, 100, 4299),
+    ("QP 1102", "Akasa Air", "BOM", "BLR", "Boeing 737 MAX", 19, 20, 105, 3999),
+    ("UK 831", "Vistara", "BLR", "BOM", "Airbus A321neo", 19, 45, 100, 4699),
+    ("6E 374", "IndiGo", "BLR", "BOM", "Airbus A320neo", 7, 10, 105, 4399),
+    ("QP 1108", "Akasa Air", "BLR", "BOM", "Boeing 737 MAX", 12, 40, 105, 3899),
+
+    # Hyderabad <-> Chennai (3 options each way)
+    ("SG 721", "SpiceJet", "HYD", "MAA", "Boeing 737-800", 12, 30, 80, 3199),
+    ("6E 714", "IndiGo", "HYD", "MAA", "Airbus A320", 8, 15, 75, 3399),
+    ("AI 542", "Air India", "HYD", "MAA", "Airbus A320neo", 18, 50, 80, 3699),
+    ("SG 305", "SpiceJet", "MAA", "HYD", "Boeing 737-800", 7, 25, 85, 2999),
+    ("6E 719", "IndiGo", "MAA", "HYD", "Airbus A320neo", 14, 10, 80, 3299),
+    ("AI 547", "Air India", "MAA", "HYD", "Airbus A320", 21, 0, 80, 3599),
+
+    # Kochi <-> Bengaluru (3 options each way)
+    ("QP 1105", "Akasa Air", "COK", "BLR", "Boeing 737 MAX", 14, 20, 70, 2899),
+    ("6E 478", "IndiGo", "COK", "BLR", "Airbus A320", 9, 30, 65, 2799),
+    ("AI 511", "Air India", "COK", "BLR", "Airbus A320neo", 19, 0, 70, 3199),
+    ("6E 471", "IndiGo", "BLR", "COK", "Airbus A320", 21, 15, 65, 2699),
+    ("QP 1109", "Akasa Air", "BLR", "COK", "Boeing 737 MAX", 7, 45, 70, 2849),
+    ("AI 514", "Air India", "BLR", "COK", "Airbus A320neo", 13, 30, 70, 3099),
+
+    # Cross connections: Delhi, Hyderabad, Chennai
+    ("6E 618", "IndiGo", "DEL", "HYD", "Airbus A320", 16, 0, 125, 4599),
+    ("AI 839", "Air India", "DEL", "HYD", "Airbus A321neo", 10, 15, 120, 4899),
     ("QP 1302", "Akasa Air", "HYD", "BLR", "Boeing 737 MAX", 13, 10, 75, 3099),
+    ("6E 498", "IndiGo", "HYD", "BLR", "Airbus A320neo", 7, 50, 75, 2999),
+    ("AI 439", "Air India", "MAA", "DEL", "Airbus A321neo", 18, 10, 145, 5999),
+    ("6E 2134", "IndiGo", "MAA", "DEL", "Airbus A320neo", 6, 40, 150, 5299),
 ]
 
 BUSINESS_COLUMNS = ("A", "C", "D", "F")

@@ -221,4 +221,43 @@
       input.min = new Date().toISOString().split("T")[0];
     }
   });
+
+  /* ---------------------- smooth page transitions ---------------------- */
+  const pageShell = document.querySelector(".page-shell");
+  if (pageShell) {
+    document.querySelectorAll("a[href]").forEach((link) => {
+      link.addEventListener("click", (e) => {
+        const href = link.getAttribute("href");
+        if (
+          !href ||
+          href.startsWith("#") ||
+          href.startsWith("mailto:") ||
+          href.startsWith("tel:") ||
+          href.startsWith("javascript:") ||
+          link.target === "_blank" ||
+          link.hasAttribute("download") ||
+          e.ctrlKey ||
+          e.metaKey ||
+          e.shiftKey ||
+          e.altKey
+        ) {
+          return;
+        }
+
+        try {
+          const targetUrl = new URL(link.href, window.location.origin);
+          if (
+            targetUrl.origin === window.location.origin &&
+            targetUrl.pathname !== window.location.pathname
+          ) {
+            e.preventDefault();
+            pageShell.classList.add("page-exit");
+            setTimeout(() => {
+              window.location.href = link.href;
+            }, 160);
+          }
+        } catch (err) {}
+      });
+    });
+  }
 })();
