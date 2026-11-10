@@ -32,6 +32,25 @@ def services():
     return render_template("services.html")
 
 
+@main_bp.route("/contact", methods=["GET", "POST"])
+def contact():
+    """Dedicated passenger support and contact page."""
+    from flask import flash, request
+    if request.method == "POST":
+        name = (request.form.get("name") or "").strip()
+        email = (request.form.get("email") or "").strip()
+        message = (request.form.get("message") or "").strip()
+        if name and email and message:
+            flash(
+                "Thank you for reaching out! Our support team (shoaibmeermd@gmail.com) "
+                "has received your message and will get back to you promptly.",
+                "success",
+            )
+        else:
+            flash("Please provide your name, valid email address, and inquiry message.", "warning")
+    return render_template("contact.html")
+
+
 @main_bp.route("/health")
 def health():
     return jsonify({"status": "ok", "app": "SkyBook"})
