@@ -1,5 +1,6 @@
 """Application configuration loaded from environment variables."""
 import os
+import urllib.parse
 from datetime import timedelta
 
 
@@ -9,13 +10,19 @@ def _db_uri(name: str) -> str:
     if uri:
         if uri.startswith("mysql://"):
             uri = uri.replace("mysql://", "mysql+pymysql://", 1)
+        if "tidbcloud.com" in uri and "ssl" not in uri:
+            sep = "&" if "?" in uri else "?"
+            uri = f"{uri}{sep}ssl_verify_cert=true"
         return uri
-    user = os.getenv("DB_USER", "root")
-    password = os.getenv("DB_PASSWORD", "")
+    raw_user = os.getenv("DB_USER", "root")
+    raw_pass = os.getenv("DB_PASSWORD", "")
+    user = urllib.parse.quote_plus(raw_user)
+    password = urllib.parse.quote_plus(raw_pass)
     host = os.getenv("DB_HOST", "localhost")
     port = os.getenv("DB_PORT", "3306")
-    auth = f"{user}:{password}" if password else user
-    return f"mysql+pymysql://{auth}@{host}:{port}/{name}?charset=utf8mb4"
+    auth = f"{user}:{password}" if raw_pass else user
+    ssl_extra = "&ssl_verify_cert=true" if "tidbcloud.com" in host else ""
+    return f"mysql+pymysql://{auth}@{host}:{port}/{name}?charset=utf8mb4{ssl_extra}"
 
 
 class BaseConfig:
