@@ -42,8 +42,10 @@
     }
 
     seatMap.addEventListener("click", (event) => {
-      const seat = event.target.closest(".seat[data-status='AVAILABLE']");
-      if (!seat) return;
+      const seat = event.target.closest(
+        ".seat.available, .seat[data-seat-status='AVAILABLE'], .seat[data-status='AVAILABLE']"
+      );
+      if (!seat || seat.disabled || seat.classList.contains("booked") || seat.classList.contains("held")) return;
       const id = seat.dataset.seatId;
       if (selected.has(id)) {
         selected.delete(id);
