@@ -1,0 +1,140 @@
+{% extends "admin/layout.html" %}
+{% block title %}Schedules · SkyBook admin{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
+  <div>
+    <div class="section-eyebrow">Timetable</div>
+    <h1 style="font-size:1.6rem;margin:0">Flight schedules</h1>
+    <p class="text-muted-2 mb-0" style="font-size:.85rem">Dated departures with fares. Each schedule owns its seat inventory.</p>
+  </div>
+  <button class="btn btn-sky btn-sm" data-bs-toggle="modal" data-bs-target="#newSchedule">Add schedule</button>
+</div>
+
+<div class="surface">
+  <div class="table-responsive" style="max-height:70vh;overflow-y:auto">
+    <table class="table table-skybook">
+      <thead style="position:sticky;top:0;z-index:2">
+        <tr>
+          <th>Flight</th><th>Route</th><th>Departure</th><th>Arrival</th>
+          <th>Base fare</th><th>Seats</th><th>Status</th><th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for schedule in schedules %}
+          <tr>
+            <td style="font-weight:700;color:var(--navy)">{{ schedule.flight.flight_number }}
+              <div class="text-muted-2" style="font-size:.74rem;font-weight:500">{{ schedule.flight.airline_name }}</div>
+            </td>
+            <td>{{ schedule.flight.source_airport.airport_code }} → {{ schedule.flight.destination_airport.airport_code }}</td>
+            <td>{{ schedule.departure_time|datetimefmt }}</td>
+            <td>{{ schedule.arrival_time|datetimefmt }}</td>
+            <td>{{ schedule.base_fare|inr }}</td>
+            <td>{{ schedule.available_seats }} / {{ schedule.total_seats }}</td>
+            <td><span class="status-chip {{ 'active' if schedule.status == 'SCHEDULED' else 'neutral' }}">{{ schedule.status }}</span></td>
+            <td class="text-end">
+              <div class="d-flex justify-content-end gap-1">
+                <a href="{{ url_for('admin.schedule_seats', schedule_id=schedule.schedule_id) }}" class="btn btn-ghost btn-sm">Seats</a>
+                <button class="btn btn-ghost btn-sm" data-bs-toggle="modal" data-bs-target="#editSchedule{{ schedule.schedule_id }}">Edit</button>
+              </div>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="8" class="text-center text-muted-2 py-4">No schedules yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% for schedule in schedules %}
+  <div class="modal fade" id="editSchedule{{ schedule.schedule_id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <form class="modal-content" method="post" action="{{ url_for('admin.edit_schedule', schedule_id=schedule.schedule_id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ schedule.flight.flight_number }} · {{ schedule.departure_time|datefmt }}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Departure</label>
+              <input class="form-control" type="datetime-local" name="departure_time" value="{{ schedule.departure_time.strftime('%Y-%m-%dT%H:%M') }}" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Arrival</label>
+              <input class="form-control" type="datetime-local" name="arrival_time" value="{{ schedule.arrival_time.strftime('%Y-%m-%dT%H:%M') }}" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label">Base fare (INR)</label>
+              <input class="form-control" type="number" step="0.01" min="1" name="base_fare" value="{{ schedule.base_fare }}" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label">Status</label>
+              <select class="form-select" name="status">
+                {% for status in ['SCHEDULED','DEPARTED','CANCELLED','COMPLETED'] %}
+                  <option value="{{ status }}" {% if schedule.status == status %}selected{% endif %}>{{ status|title }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Close</button>
+          <button class="btn btn-sky" type="submit">Save schedule</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endfor %}
+
+<div class="modal fade" id="newSchedule" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content" method="post" action="{{ url_for('admin.create_schedule') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="modal-header"><h5 class="modal-title">Add schedule</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label">Flight</label>
+            <select class="form-select" name="flight_id" required>
+              {% for flight in flights %}
+                <option value="{{ flight.flight_id }}">{{ flight.flight_number }} · {{ flight.airline_name }} ({{ flight.source_airport.airport_code }} → {{ flight.destination_airport.airport_code }})</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label">Departure</label>
+            <input class="form-control" type="datetime-local" name="departure_time" required>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label">Arrival</label>
+            <input class="form-control" type="datetime-local" name="arrival_time" required>
+          </div>
+          <div class="col-sm-4">
+            <label class="form-label">Base fare</label>
+            <input class="form-control" type="number" step="0.01" min="1" name="base_fare" value="4500" required>
+          </div>
+          <div class="col-sm-4">
+            <label class="form-label">Business rows</label>
+            <input class="form-control" type="number" min="0" max="8" name="business_rows" value="3">
+          </div>
+          <div class="col-sm-4">
+            <label class="form-label">Economy rows</label>
+            <input class="form-control" type="number" min="1" max="40" name="economy_rows" value="20">
+          </div>
+        </div>
+        <div class="mt-2" style="font-size:.74rem;color:var(--muted)">
+          A full seat map is generated automatically: business 4-abreast, economy 6-abreast.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-sky" type="submit">Create schedule</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

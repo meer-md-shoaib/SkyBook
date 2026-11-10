@@ -1,0 +1,17 @@
+{% if seat is none %}
+  <span class="seat empty" aria-hidden="true"></span>
+{% else %}
+  {% set is_free = seat.status == 'AVAILABLE' %}
+  <button type="button"
+          class="seat {{ 'business' if seat['class'] == 'BUSINESS' else '' }} {{ 'available' if is_free else ('held' if seat.status == 'HELD' else 'booked') }}"
+          data-seat-id="{{ seat.id }}"
+          data-seat-number="{{ seat.number }}"
+          data-seat-class="{{ seat['class'] }}"
+          data-seat-status="{{ seat.status }}"
+          data-price="{{ seat.price }}"
+          {% if not is_free %}disabled{% endif %}
+          aria-label="Seat {{ seat.number }} {{ seat['class']|title }} {{ 'available' if is_free else seat.status|lower }}"
+          title="Seat {{ seat.number }} · {{ seat['class']|title }} · ₹{{ seat.price|int }} {% if not is_free %}({{ seat.status|title }}){% endif %}">
+    {{ seat.number }}
+  </button>
+{% endif %}

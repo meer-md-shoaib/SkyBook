@@ -1,0 +1,98 @@
+{% extends "admin/layout.html" %}
+{% block title %}Booking {{ booking.booking_reference }} · SkyBook admin{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
+  <div>
+    <div class="section-eyebrow">Reservation</div>
+    <h1 style="font-size:1.5rem;margin:0" class="mono">{{ booking.booking_reference }}</h1>
+    <p class="text-muted-2 mb-0" style="font-size:.85rem">
+      Created {{ booking.created_at|datetimefmt }} by {{ booking.user.name }} ({{ booking.user.email }})
+    </p>
+  </div>
+  <div class="d-flex gap-2 align-items-center">
+    <span class="status-chip {{ booking.booking_status|lower }}">{{ booking.booking_status }}</span>
+    <a href="{{ url_for('admin.bookings') }}" class="btn btn-ghost btn-sm">All bookings</a>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-7">
+    <div class="surface surface-pad mb-4">
+      <h3 style="font-size:1rem">Itinerary</h3>
+      <div class="kv mt-2"><span class="k">Flight</span><span class="v">{{ booking.schedule.flight.airline_name }} {{ booking.schedule.flight.flight_number }}</span></div>
+      <div class="kv"><span class="k">Route</span><span class="v">{{ booking.schedule.flight.source_airport.city }} ({{ booking.schedule.flight.source_airport.airport_code }}) → {{ booking.schedule.flight.destination_airport.city }} ({{ booking.schedule.flight.destination_airport.airport_code }})</span></div>
+      <div class="kv"><span class="k">Departure</span><span class="v">{{ booking.schedule.departure_time|datetimefmt }}</span></div>
+      <div class="kv"><span class="k">Arrival</span><span class="v">{{ booking.schedule.arrival_time|datetimefmt }}</span></div>
+      <div class="kv"><span class="k">Seats</span><span class="v">{{ booking.seat_numbers or '—' }}</span></div>
+      <div class="kv"><span class="k">Contact</span><span class="v">{{ booking.contact_email }} · {{ booking.contact_phone }}</span></div>
+      {% if booking.hold_expires_at %}
+        <div class="kv"><span class="k">Hold expires</span><span class="v">{{ booking.hold_expires_at|datetimefmt }}</span></div>
+      {% endif %}
+    </div>
+
+    <div class="surface surface-pad">
+      <h3 style="font-size:1rem">Passengers</h3>
+      <div class="table-responsive mt-2">
+        <table class="table table-skybook">
+          <thead><tr><th>Name</th><th>DOB</th><th>Gender</th><th>ID</th><th>Seat</th></tr></thead>
+          <tbody>
+            {% for passenger in booking.passengers %}
+              <tr>
+                <td style="font-weight:700;color:var(--navy)">{{ passenger.full_name }}</td>
+                <td>{{ passenger.date_of_birth|datefmt }}</td>
+                <td>{{ passenger.gender|title }}</td>
+                <td>{{ passenger.identification_type.replace('_',' ')|title }} · {{ passenger.masked_id }}</td>
+                <td>{{ passenger.seat.seat_number if passenger.seat else '—' }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="5" class="text-center text-muted-2 py-3">No passenger details captured.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-5">
+    <div class="surface surface-pad mb-4">
+      <h3 style="font-size:1rem">Payment</h3>
+      {% if booking.payment %}
+        <div class="kv mt-2"><span class="k">Status</span><span class="v"><span class="status-chip {{ booking.payment.payment_status|lower }}">{{ booking.payment.payment_status }}</span></span></div>
+        <div class="kv"><span class="k">Reference</span><span class="v mono" style="font-size:.78rem">{{ booking.payment.transaction_reference }}</span></div>
+        <div class="kv"><span class="k">Method</span><span class="v">{{ booking.payment.payment_method|title }}</span></div>
+        <div class="kv"><span class="k">Attempts</span><span class="v">{{ booking.payment.attempts }}</span></div>
+        <div class="kv"><span class="k">Paid at</span><span class="v">{{ booking.payment.payment_time|datetimefmt }}</span></div>
+        <div class="kv"><span class="k">Gateway</span><span class="v" style="font-weight:500;max-width:60%">{{ booking.payment.gateway_message }}</span></div>
+      {% else %}
+        <p class="text-muted-2 mb-0" style="font-size:.86rem">No payment attempted.</p>
+      {% endif %}
+      <div class="summary-row total"><span>Total</span><span>{{ booking.total_amount|inr }}</span></div>
+    </div>
+
+    <div class="surface surface-pad mb-4">
+      <h3 style="font-size:1rem">Ticket</h3>
+      {% if booking.ticket %}
+        <div class="kv mt-2"><span class="k">Number</span><span class="v mono">{{ booking.ticket.ticket_number }}</span></div>
+        <div class="kv"><span class="k">Generated</span><span class="v">{{ booking.ticket.generated_at|datetimefmt }}</span></div>
+        <div class="kv"><span class="k">File</span><span class="v" style="font-size:.78rem">{{ booking.ticket.file_path or 'not rendered' }}</span></div>
+        {% if booking.booking_status == 'CONFIRMED' %}
+          <a href="{{ url_for('tickets.download', booking_id=booking.booking_id) }}" class="btn btn-navy w-100 mt-3 btn-sm">Download PDF</a>
+        {% endif %}
+      {% else %}
+        <p class="text-muted-2 mb-0" style="font-size:.86rem">No ticket issued yet.</p>
+      {% endif %}
+    </div>
+
+    {% if booking.cancellation %}
+      <div class="surface surface-pad">
+        <h3 style="font-size:1rem">Cancellation</h3>
+        <div class="kv mt-2"><span class="k">Reason</span><span class="v" style="font-weight:500">{{ booking.cancellation.cancellation_reason }}</span></div>
+        <div class="kv"><span class="k">Date</span><span class="v">{{ booking.cancellation.cancellation_date|datetimefmt }}</span></div>
+        <div class="kv"><span class="k">Refund</span><span class="v">{{ booking.cancellation.refund_amount|inr }}</span></div>
+        <div class="kv"><span class="k">Refund status</span><span class="v">{{ booking.cancellation.refund_status|title }}</span></div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

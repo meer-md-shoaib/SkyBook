@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}SkyBook · Book flights seamlessly{% endblock %}</title>
+  <meta name="description" content="SkyBook — a modern airline reservation and management platform. Search flights, choose seats and book in minutes.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b2447'/%3E%3Cpath d='M25 9 17 16l-5-1-3 2 7 2 1 6 1.7-1 1-4L26 12z' fill='%2364aef0'/%3E%3C/svg%3E">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+<header class="site-header">
+  <nav class="navbar navbar-expand-lg navbar-skybook">
+    <div class="container">
+      <a class="brand" href="{{ url_for('main.index') }}">
+        <span class="brand-mark">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M21 4 13.6 11l-4.4-.9-2.6 1.8 6.1 1.7.9 5.3 1.6-.9.8-3.6L22 7.3z" fill="#fff"/>
+          </svg>
+        </span>
+        <span class="brand-text">
+          <span class="brand-name">Sky<span>Book</span></span>
+          <span class="brand-sub">Fly smarter</span>
+        </span>
+      </a>
+
+      <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav nav-links mx-auto">
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}#search">Book a flight</a></li>
+          {% if current_user.is_authenticated %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('bookings.my_bookings') }}">My bookings</a></li>
+            {% if current_user.is_admin %}
+              <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+            {% endif %}
+          {% endif %}
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}#services">Services</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('main.index') }}#contact">Contact</a></li>
+        </ul>
+
+        <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+          {% if current_user.is_authenticated %}
+            <div class="dropdown">
+              <button class="btn d-flex align-items-center gap-2 border-0 bg-transparent p-1" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="avatar-chip">{{ initials(current_user.name) }}</span>
+                <span class="d-none d-sm-inline" style="font-weight:700;font-size:.87rem;color:var(--navy)">{{ current_user.name.split()[0] }}</span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end skybook">
+                <li class="px-3 py-2">
+                  <div style="font-weight:700;font-size:.88rem;color:var(--navy)">{{ current_user.name }}</div>
+                  <div class="text-muted-2" style="font-size:.74rem">{{ current_user.email }}</div>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{{ url_for('bookings.my_bookings') }}">My bookings</a></li>
+                {% if current_user.is_admin %}
+                  <li><a class="dropdown-item" href="{{ url_for('admin.dashboard') }}">Admin dashboard</a></li>
+                {% endif %}
+                <li>
+                  <form method="post" action="{{ url_for('auth.logout') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="dropdown-item text-danger">Sign out</button>
+                  </form>
+                </li>
+              </ul>
+            </div>
+          {% else %}
+            <a class="btn btn-nav-ghost" href="{{ url_for('auth.login') }}">Sign in</a>
+            <a class="btn btn-nav-solid" href="{{ url_for('auth.register') }}">Create account</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="container mt-3">
+      {% for category, message in messages %}
+        {% set cls = {'success':'alert-success','danger':'alert-danger','warning':'alert-warning','info':'alert-info','message':'alert-info'}.get(category, 'alert-info') %}
+        <div class="alert {{ cls }} alert-dismissible fade show d-flex align-items-start gap-2" role="alert">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" style="flex:0 0 auto;margin-top:2px"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 8h.01M11 12h1v4h1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <div>{{ message }}</div>
+          <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer" id="contact">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="brand foot-brand mb-3">
+          <span class="brand-mark">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 4 13.6 11l-4.4-.9-2.6 1.8 6.1 1.7.9 5.3 1.6-.9.8-3.6L22 7.3z" fill="#fff"/></svg>
+          </span>
+          <span class="brand-text">
+            <span class="brand-name">Sky<span>Book</span></span>
+            <span class="brand-sub">Fly smarter</span>
+          </span>
+        </div>
+        <p style="font-size:.88rem;max-width:34ch">
+          A complete airline reservation platform — search live schedules, pick your seat,
+          pay securely and download your e-ticket in one flow.
+        </p>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h5>Explore</h5>
+        <a href="{{ url_for('main.index') }}#search">Search flights</a><br>
+        <a href="{{ url_for('main.index') }}#services">Services</a><br>
+        <a href="{{ url_for('bookings.my_bookings') }}">Manage booking</a><br>
+        <a href="{{ url_for('auth.register') }}">Create account</a>
+      </div>
+      <div class="col-6 col-lg-3">
+        <h5>Support</h5>
+        <a href="mailto:support@skybook.example">support@skybook.example</a><br>
+        <a href="tel:+911800123456">1800 123 456 (toll free)</a><br>
+        <span style="font-size:.87rem">Mon–Sun · 24×7 assistance</span>
+      </div>
+      <div class="col-lg-3">
+        <h5>SkyBook HQ</h5>
+        <p style="font-size:.87rem;margin:0">
+          Terminal 2, Kempegowda International Airport<br>
+          Bengaluru 560300, India
+        </p>
+      </div>
+    </div>
+    <div class="footer-bottom d-flex flex-wrap justify-content-between gap-2">
+      <span>© {{ current_year }} SkyBook. Demo project for academic use.</span>
+      <span>Payments are simulated — no real money is charged.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

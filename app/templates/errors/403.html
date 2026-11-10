@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Access denied · SkyBook{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="surface surface-pad text-center mx-auto" style="max-width:560px">
+    <div class="section-eyebrow">Error 403</div>
+    <h1 style="font-size:2rem">You don't have access to that page</h1>
+    <p class="text-muted-2">This area is restricted to the booking owner or an administrator.</p>
+    <a href="{{ url_for('main.index') }}" class="btn btn-sky">Return home</a>
+  </div>
+</div>
+{% endblock %}

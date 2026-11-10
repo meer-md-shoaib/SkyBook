@@ -1,0 +1,58 @@
+{% extends "admin/layout.html" %}
+{% block title %}Cancellations · SkyBook admin{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
+  <div>
+    <div class="section-eyebrow">Refunds</div>
+    <h1 style="font-size:1.6rem;margin:0">Cancellations</h1>
+    <p class="text-muted-2 mb-0" style="font-size:.85rem">Cancelled reservations and the refund recorded for each.</p>
+  </div>
+  <span class="status-chip neutral">{{ cancellations|length }} records</span>
+</div>
+
+<div class="surface">
+  <div class="table-responsive">
+    <table class="table table-skybook">
+      <thead>
+        <tr><th>Booking</th><th>Passenger</th><th>Flight</th><th>Reason</th><th>Cancelled on</th><th>Refund status</th><th class="text-end">Refund</th></tr>
+      </thead>
+      <tbody>
+        {% for cancellation in cancellations %}
+          <tr>
+            <td>
+              {% if cancellation.booking %}
+                <a class="mono" href="{{ url_for('admin.booking_detail', booking_id=cancellation.booking_id) }}" style="font-weight:700">{{ cancellation.booking.booking_reference }}</a>
+              {% else %}
+                —
+              {% endif %}
+            </td>
+            <td>
+              {% if cancellation.booking and cancellation.booking.user %}
+                {{ cancellation.booking.user.name }}
+                <div class="text-muted-2" style="font-size:.72rem">{{ cancellation.booking.user.email }}</div>
+              {% else %}
+                —
+              {% endif %}
+            </td>
+            <td>
+              {% if cancellation.booking %}
+                {{ cancellation.booking.schedule.flight.flight_number }}
+                <div class="text-muted-2" style="font-size:.72rem">{{ cancellation.booking.schedule.flight.source_airport.airport_code }} → {{ cancellation.booking.schedule.flight.destination_airport.airport_code }}</div>
+              {% else %}
+                —
+              {% endif %}
+            </td>
+            <td style="max-width:260px">{{ cancellation.cancellation_reason or '—' }}</td>
+            <td>{{ cancellation.cancellation_date|datetimefmt }}</td>
+            <td><span class="status-chip {{ cancellation.refund_status|lower }}">{{ cancellation.refund_status }}</span></td>
+            <td class="text-end" style="font-weight:700;color:var(--navy)">{{ cancellation.refund_amount|inr }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="7" class="text-center text-muted-2 py-4">No cancellations recorded yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

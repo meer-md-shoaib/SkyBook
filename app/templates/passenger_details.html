@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Passenger details · SkyBook{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <div class="crumbs mb-2">
+      <a href="{{ url_for('main.index') }}">Home</a> <span class="mx-1">/</span>
+      <a href="{{ url_for('bookings.my_bookings') }}">My bookings</a> <span class="mx-1">/</span>
+      <span>Passenger details</span>
+    </div>
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3">
+      <div>
+        <h1>Who's flying?</h1>
+        <div class="text-muted-2" style="font-size:.88rem">
+          {{ booking.schedule.flight.flight_number }} · {{ booking.schedule.flight.source_airport.city }} →
+          {{ booking.schedule.flight.destination_airport.city }} · {{ booking.schedule.departure_time|datefmt }}
+        </div>
+      </div>
+      {% if hold_seconds %}
+        <span class="countdown" data-countdown="{{ hold_seconds }}" data-countdown-key="{{ booking.booking_id }}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Seats held for <strong>--:--</strong>
+        </span>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<div class="container py-4">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <form method="post" novalidate>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% set seats = booking.active_seats|sort(attribute='seat_number') %}
+
+        {% for index in range(seat_count) %}
+          {% set pax = submitted[index] if submitted|length > index else {} %}
+          {% set seat = seats[index] if seats|length > index else none %}
+          <div class="surface surface-pad mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h3 style="font-size:1.02rem;margin:0">
+                Passenger {{ index + 1 }}
+                <span class="text-muted-2" style="font-size:.78rem;font-weight:600">· Adult</span>
+              </h3>
+              {% if seat %}
+                <span class="status-chip neutral">
+                  Seat {{ seat.seat_number }} · {{ seat.seat_class|title }}
+                </span>
+              {% endif %}
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label" for="full_name_{{ index }}">Full name (as on ID)</label>
+                <input class="form-control" id="full_name_{{ index }}" name="full_name_{{ index }}" type="text"
+                       value="{{ pax.get('full_name', '') }}" placeholder="e.g. Aarav Sharma" required maxlength="80">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="date_of_birth_{{ index }}">Date of birth</label>
+                <input class="form-control" id="date_of_birth_{{ index }}" name="date_of_birth_{{ index }}" type="date"
+                       value="{{ pax.get('date_of_birth', '') }}" max="{{ now.strftime('%Y-%m-%d') }}" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label" for="gender_{{ index }}">Gender</label>
+                <select class="form-select" id="gender_{{ index }}" name="gender_{{ index }}" required>
+                  <option value="" {% if not pax.get('gender') %}selected{% endif %} disabled>Select</option>
+                  {% for gender in genders %}
+                    <option value="{{ gender }}" {% if pax.get('gender') == gender %}selected{% endif %}>{{ gender|title }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label" for="identification_type_{{ index }}">ID type</label>
+                <select class="form-select" id="identification_type_{{ index }}" name="identification_type_{{ index }}" required>
+                  <option value="" {% if not pax.get('identification_type') %}selected{% endif %} disabled>Select</option>
+                  {% for code in id_types %}
+                    <option value="{{ code }}" {% if pax.get('identification_type') == code %}selected{% endif %}>{{ id_labels[code] }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label" for="identification_number_{{ index }}">ID number</label>
+                <input class="form-control" id="identification_number_{{ index }}" name="identification_number_{{ index }}" type="text"
+                       value="{{ pax.get('identification_number', '') }}" placeholder="5–30 characters"
+                       required minlength="5" maxlength="30" autocomplete="off">
+              </div>
+            </div>
+            <div class="mt-2" style="font-size:.73rem;color:var(--muted)">
+              ID numbers are masked in listings and only used for travel verification.
+            </div>
+          </div>
+        {% endfor %}
+
+        <div class="d-flex flex-wrap gap-2">
+          <button type="submit" class="btn btn-sky">Save &amp; review booking</button>
+          <a href="{{ url_for('bookings.my_bookings') }}" class="btn btn-ghost">Cancel this booking</a>
+        </div>
+      </form>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="surface surface-pad sticky-panel">
+        <div class="small-caps mb-2">Booking summary</div>
+        <div class="kv"><span class="k">Reference</span><span class="v mono">{{ booking.booking_reference }}</span></div>
+        <div class="kv"><span class="k">Flight</span><span class="v">{{ booking.schedule.flight.flight_number }}</span></div>
+        <div class="kv"><span class="k">Route</span><span class="v">{{ booking.schedule.flight.source_airport.airport_code }} → {{ booking.schedule.flight.destination_airport.airport_code }}</span></div>
+        <div class="kv"><span class="k">Departure</span><span class="v">{{ booking.schedule.departure_time|time12 }}</span></div>
+        <div class="kv"><span class="k">Seats</span><span class="v">{{ booking.seat_numbers or '—' }}</span></div>
+
+        <hr style="border-color:var(--line)">
+        <div class="small-caps mb-2">Contact</div>
+        <div class="kv"><span class="k">Email</span><span class="v">{{ booking.contact_email }}</span></div>
+        <div class="kv"><span class="k">Phone</span><span class="v">{{ booking.contact_phone }}</span></div>
+
+        <div class="summary-row total">
+          <span>Total fare</span><span>{{ booking.total_amount|inr }}</span>
+        </div>
+        <div class="mt-2" style="font-size:.74rem;color:var(--muted)">
+          Payment is collected on the next step. Your seats stay reserved until the timer ends.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

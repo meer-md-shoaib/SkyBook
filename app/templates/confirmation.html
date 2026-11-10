@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Booking confirmed · {{ booking.booking_reference }} · SkyBook{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="text-center mb-4">
+    <div style="width:66px;height:66px;border-radius:50%;background:var(--success-bg);color:var(--success);display:grid;place-items:center;margin:0 auto 1rem">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none"><path d="m5 12.5 4.5 4.5L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <h1 style="font-size:1.9rem">Your booking is confirmed</h1>
+    <p class="text-muted-2 mb-0">
+      A confirmation has been recorded for {{ booking.contact_email }}. Your e-ticket is ready to download.
+    </p>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="ticket-stub mb-4">
+        <div class="ticket-top">
+          <div>
+            <div style="font-size:.66rem;letter-spacing:.16em;color:#a9c8e6;font-weight:700">BOOKING REFERENCE</div>
+            <div class="ref mono">{{ booking.booking_reference }}</div>
+            <div style="font-size:.76rem;color:#c3d9f0">{{ booking.schedule.flight.airline_name }} · {{ booking.schedule.flight.flight_number }}</div>
+          </div>
+          <div class="text-end">
+            <span class="status-chip confirmed" style="background:rgba(255,255,255,.16);color:#fff">{{ booking.booking_status }}</span>
+            <div class="mt-2" style="font-size:.72rem;color:#c3d9f0">Issued {{ booking.updated_at|datefmt }}</div>
+          </div>
+        </div>
+
+        <div class="ticket-body">
+          <div class="row g-4 align-items-center">
+            <div class="col-md-8">
+              <div class="itinerary" style="grid-template-columns:1fr auto 1fr">
+                <div class="itin-point">
+                  <div class="code">{{ booking.schedule.flight.source_airport.airport_code }}</div>
+                  <div class="city">{{ booking.schedule.flight.source_airport.city }}</div>
+                  <div class="when">{{ booking.schedule.departure_time|time12 }}</div>
+                </div>
+                <div class="itin-line">
+                  <span>{{ booking.schedule.duration_label }}</span>
+                  <div class="bar"><i>✈</i></div>
+                  <span>{{ booking.schedule.departure_time|datefmt }}</span>
+                </div>
+                <div class="itin-point text-end">
+                  <div class="code">{{ booking.schedule.flight.destination_airport.airport_code }}</div>
+                  <div class="city">{{ booking.schedule.flight.destination_airport.city }}</div>
+                  <div class="when">{{ booking.schedule.arrival_time|time12 }}</div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 text-center">
+              {% set sum = namespace(v=0) %}
+              {% for ch in booking.booking_reference %}
+                {% if ch.isdigit() %}{% set sum.v = sum.v + ch|int %}{% else %}{% set sum.v = sum.v + loop.index %}{% endif %}
+              {% endfor %}
+              <svg class="qr mx-auto" viewBox="0 0 11 11" shape-rendering="crispEdges" role="img" aria-label="Demo QR code for {{ booking.booking_reference }}">
+                <rect width="11" height="11" fill="#fff"/>
+                {% for r in range(11) %}
+                  {% for c in range(11) %}
+                    {% if ((r * 7 + c * 5 + sum.v + (r * c)) % 3 == 0) or (r < 3 and c < 3) or (r < 3 and c > 7) or (r > 7 and c < 3) %}
+                      <rect x="{{ c }}" y="{{ r }}" width="1" height="1" fill="#0b2447"/>
+                    {% endif %}
+                  {% endfor %}
+                {% endfor %}
+              </svg>
+              <div style="font-size:.66rem;color:var(--muted);font-weight:700;letter-spacing:.08em">DEMO BOARDING CODE</div>
+            </div>
+          </div>
+
+          <div class="perforation my-4"></div>
+
+          <div class="row g-3" style="font-size:.85rem">
+            <div class="col-6 col-md-3"><span class="small-caps d-block">Passengers</span>{{ booking.passengers|length }}</div>
+            <div class="col-6 col-md-3"><span class="small-caps d-block">Seats</span>{{ booking.seat_numbers }}</div>
+            <div class="col-6 col-md-3"><span class="small-caps d-block">Aircraft</span>{{ booking.schedule.flight.aircraft_type }}</div>
+            <div class="col-6 col-md-3"><span class="small-caps d-block">Amount paid</span>{{ booking.total_amount|inr }}</div>
+          </div>
+
+          {% if booking.ticket %}
+            <div class="mt-4 d-flex flex-wrap justify-content-between align-items-center gap-2 p-3 rounded-3" style="background:var(--sky-50);border:1px solid var(--line)">
+              <div>
+                <div class="small-caps">E-ticket number</div>
+                <div class="mono" style="font-weight:700;color:var(--navy)">{{ booking.ticket.ticket_number }}</div>
+              </div>
+              <a href="{{ url_for('tickets.download', booking_id=booking.booking_id) }}" class="btn btn-navy">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" style="margin-right:.35rem"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 19h14" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Download PDF ticket
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="surface surface-pad mb-4">
+        <h3 style="font-size:1rem">Passenger details</h3>
+        <div class="table-responsive mt-2">
+          <table class="table table-skybook">
+            <thead><tr><th>Name</th><th>Seat</th><th>Class</th><th>ID</th></tr></thead>
+            <tbody>
+              {% for passenger in booking.passengers|sort(attribute='seat.seat_number') %}
+                <tr>
+                  <td style="font-weight:700;color:var(--navy)">{{ passenger.full_name }}</td>
+                  <td>{{ passenger.seat.seat_number if passenger.seat else '—' }}</td>
+                  <td>{{ passenger.seat.seat_class|title if passenger.seat else '—' }}</td>
+                  <td>{{ passenger.identification_type.replace('_',' ')|title }} · {{ passenger.masked_id }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="d-flex flex-wrap gap-2 justify-content-center">
+        <a href="{{ url_for('bookings.my_bookings') }}" class="btn btn-sky">My bookings</a>
+        <a href="{{ url_for('bookings.details', booking_id=booking.booking_id) }}" class="btn btn-ghost">Booking details</a>
+        <a href="{{ url_for('main.index') }}#search" class="btn btn-ghost">Book another flight</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

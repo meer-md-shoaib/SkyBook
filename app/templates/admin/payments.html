@@ -1,0 +1,78 @@
+{% extends "admin/layout.html" %}
+{% block title %}Payments · SkyBook admin{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
+  <div>
+    <div class="section-eyebrow">Transactions</div>
+    <h1 style="font-size:1.6rem;margin:0">Payments</h1>
+    <p class="text-muted-2 mb-0" style="font-size:.85rem">Simulated gateway transactions across all bookings.</p>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-sm-3">
+    <div class="surface surface-pad">
+      <div class="text-muted-2" style="font-size:.72rem;font-weight:700;letter-spacing:.08em">COLLECTED</div>
+      <div style="font-size:1.35rem;font-weight:800;color:var(--navy)">{{ totals.amount|inr }}</div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="surface surface-pad">
+      <div class="text-muted-2" style="font-size:.72rem;font-weight:700;letter-spacing:.08em">SUCCESSFUL</div>
+      <div style="font-size:1.35rem;font-weight:800;color:var(--success)">{{ totals.success }}</div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="surface surface-pad">
+      <div class="text-muted-2" style="font-size:.72rem;font-weight:700;letter-spacing:.08em">FAILED</div>
+      <div style="font-size:1.35rem;font-weight:800;color:var(--danger)">{{ totals.failed }}</div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="surface surface-pad">
+      <div class="text-muted-2" style="font-size:.72rem;font-weight:700;letter-spacing:.08em">REFUNDED</div>
+      <div style="font-size:1.35rem;font-weight:800;color:var(--warning)">{{ totals.refunded }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="surface">
+  <div class="table-responsive">
+    <table class="table table-skybook">
+      <thead>
+        <tr><th>Transaction</th><th>Booking</th><th>Passenger</th><th>Method</th><th>Attempts</th><th>Paid on</th><th>Status</th><th class="text-end">Amount</th></tr>
+      </thead>
+      <tbody>
+        {% for payment in payments %}
+          <tr>
+            <td class="mono" style="font-weight:700">{{ payment.transaction_reference }}</td>
+            <td>
+              {% if payment.booking %}
+                <a class="mono" href="{{ url_for('admin.booking_detail', booking_id=payment.booking_id) }}">{{ payment.booking.booking_reference }}</a>
+              {% else %}
+                —
+              {% endif %}
+            </td>
+            <td>
+              {% if payment.booking and payment.booking.user %}
+                {{ payment.booking.user.name }}
+                <div class="text-muted-2" style="font-size:.72rem">{{ payment.booking.user.email }}</div>
+              {% else %}
+                —
+              {% endif %}
+            </td>
+            <td>{{ payment.payment_method }}</td>
+            <td>{{ payment.attempts }}</td>
+            <td>{{ payment.payment_time|datetimefmt if payment.payment_time else '—' }}</td>
+            <td><span class="status-chip {{ payment.payment_status|lower }}">{{ payment.payment_status }}</span></td>
+            <td class="text-end" style="font-weight:700;color:var(--navy)">{{ payment.amount|inr }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="8" class="text-center text-muted-2 py-4">No payments recorded yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

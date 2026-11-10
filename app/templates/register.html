@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Create your account · SkyBook{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="container">
+    <div class="auth-card">
+      <div class="auth-side">
+        <div class="brand mb-4">
+          <span class="brand-mark" style="background:rgba(255,255,255,.14);box-shadow:none">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none"><path d="M21 4 13.6 11l-4.4-.9-2.6 1.8 6.1 1.7.9 5.3 1.6-.9.8-3.6L22 7.3z" fill="#fff"/></svg>
+          </span>
+          <span class="brand-text"><span class="brand-name" style="color:#fff">Sky<span style="color:#8ec5f5">Book</span></span></span>
+        </div>
+        <h2>Your journey starts here.</h2>
+        <p>Create a free account to book seats in seconds and keep every boarding pass in one place.</p>
+        <ul>
+          <li><span class="tick">✓</span> Seats held for {{ config.SEAT_HOLD_MINUTES }} minutes during checkout</li>
+          <li><span class="tick">✓</span> Download PDF tickets any time</li>
+          <li><span class="tick">✓</span> Cancel with a clear, upfront refund quote</li>
+        </ul>
+        <div class="mt-5 pt-4" style="border-top:1px solid rgba(255,255,255,.14);font-size:.82rem;color:#b9d3ec">
+          Use a password of at least 8 characters including a number.
+        </div>
+      </div>
+
+      <div class="auth-body">
+        <h3 style="font-size:1.35rem">Create your account</h3>
+        <p class="text-muted-2 mb-4" style="font-size:.88rem">It takes less than a minute — no payment details required.</p>
+
+        <form method="post" novalidate>
+          {{ form.hidden_tag() }}
+          <div class="mb-3">
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else "")) }}
+            {% for error in form.name.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="mb-3">
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else "")) }}
+            {% for error in form.email.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="mb-3">
+            {{ form.phone.label(class="form-label") }}
+            {{ form.phone(class="form-control" + (" is-invalid" if form.phone.errors else "")) }}
+            {% for error in form.phone.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+          </div>
+          <div class="row g-3 mb-4">
+            <div class="col-sm-6">
+              {{ form.password.label(class="form-label") }}
+              {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else "")) }}
+              {% for error in form.password.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+            </div>
+            <div class="col-sm-6">
+              {{ form.confirm_password.label(class="form-label") }}
+              {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else "")) }}
+              {% for error in form.confirm_password.errors %}<div class="invalid-feedback">{{ error }}</div>{% endfor %}
+            </div>
+          </div>
+          {{ form.submit(class="btn btn-sky w-100") }}
+        </form>
+
+        <div class="text-center mt-4" style="font-size:.88rem">
+          Already registered? <a href="{{ url_for('auth.login') }}" style="font-weight:700">Sign in</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

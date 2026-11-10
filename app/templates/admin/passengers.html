@@ -1,0 +1,48 @@
+{% extends "admin/layout.html" %}
+{% block title %}Passengers · SkyBook admin{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
+  <div>
+    <div class="section-eyebrow">Travellers</div>
+    <h1 style="font-size:1.6rem;margin:0">Passengers</h1>
+    <p class="text-muted-2 mb-0" style="font-size:.85rem">Registered passenger accounts, newest first.</p>
+  </div>
+  <span class="status-chip neutral">{{ users|length }} accounts</span>
+</div>
+
+<div class="surface">
+  <div class="table-responsive">
+    <table class="table table-skybook">
+      <thead>
+        <tr><th>Name</th><th>Contact</th><th>Joined</th><th>Status</th><th class="text-end">Bookings</th></tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:.55rem">
+                <span class="avatar" style="width:28px;height:28px;font-size:.7rem">{{ initials(user.name) }}</span>
+                <span style="font-weight:700">{{ user.name }}</span>
+              </div>
+            </td>
+            <td>
+              <div style="font-size:.82rem">{{ user.email }}</div>
+              <div class="text-muted-2" style="font-size:.72rem">{{ user.phone or '—' }}</div>
+            </td>
+            <td>{{ user.created_at|datefmt }}</td>
+            <td>
+              <span class="status-chip {{ 'active' if user.is_active else 'cancelled' }}">
+                {{ 'Active' if user.is_active else 'Disabled' }}
+              </span>
+            </td>
+            <td class="text-end" style="font-weight:700;color:var(--navy)">{{ user.bookings.count() }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="5" class="text-center text-muted-2 py-4">No passenger accounts yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

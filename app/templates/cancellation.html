@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Cancel booking · SkyBook{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <div class="crumbs mb-2">
+      <a href="{{ url_for('main.index') }}">Home</a> <span class="mx-1">/</span>
+      <a href="{{ url_for('bookings.my_bookings') }}">My bookings</a> <span class="mx-1">/</span>
+      <a href="{{ url_for('bookings.details', booking_id=booking.booking_id) }}">{{ booking.booking_reference }}</a>
+      <span class="mx-1">/</span> <span>Cancel</span>
+    </div>
+    <h1>Cancel booking</h1>
+    <div class="text-muted-2" style="font-size:.88rem">Review the refund before confirming. This action cannot be undone.</div>
+  </div>
+</section>
+
+<div class="container py-4">
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="surface surface-pad surface-lg mb-4">
+        <h3 style="font-size:1.05rem">Booking being cancelled</h3>
+        <div class="kv mt-2"><span class="k">Reference</span><span class="v mono">{{ booking.booking_reference }}</span></div>
+        <div class="kv"><span class="k">Flight</span><span class="v">{{ booking.schedule.flight.airline_name }} {{ booking.schedule.flight.flight_number }}</span></div>
+        <div class="kv"><span class="k">Route</span><span class="v">{{ booking.schedule.flight.source_airport.city }} → {{ booking.schedule.flight.destination_airport.city }}</span></div>
+        <div class="kv"><span class="k">Departure</span><span class="v">{{ booking.schedule.departure_time|datetimefmt }}</span></div>
+        <div class="kv"><span class="k">Seats</span><span class="v">{{ booking.seat_numbers }}</span></div>
+        <div class="kv"><span class="k">Passengers</span><span class="v">{{ booking.passengers|length }}</span></div>
+      </div>
+
+      {% if eligible %}
+        <form method="post" class="surface surface-pad" data-cancel-form>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <h3 style="font-size:1.05rem">Why are you cancelling?</h3>
+          <p class="text-muted-2" style="font-size:.83rem">Optional — helps us improve the experience.</p>
+          <textarea class="form-control" name="reason" rows="3" maxlength="255"
+                    placeholder="e.g. Change of travel plans"></textarea>
+
+          <div class="form-check mt-3">
+            <input class="form-check-input" type="checkbox" name="confirm" value="yes" id="confirmCancel">
+            <label class="form-check-label" for="confirmCancel" style="font-size:.86rem">
+              I understand that {{ quote.fee|inr }} ({{ quote.fee_percent|int }}% of the fare) is non-refundable
+              and {{ booking.seat_numbers }} will be released immediately.
+            </label>
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 mt-4">
+            <button type="submit" class="btn btn-danger-soft" disabled>Confirm cancellation</button>
+            <a href="{{ url_for('bookings.details', booking_id=booking.booking_id) }}" class="btn btn-ghost">Keep my booking</a>
+          </div>
+        </form>
+      {% else %}
+        <div class="surface surface-pad">
+          <h3 style="font-size:1.02rem">Cancellation unavailable</h3>
+          <p class="text-muted-2 mb-3" style="font-size:.9rem">{{ eligibility_reason }}</p>
+          <a href="{{ url_for('bookings.details', booking_id=booking.booking_id) }}" class="btn btn-ghost">Back to booking</a>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="col-lg-5">
+      <div class="surface surface-pad surface-lg sticky-panel">
+        <div class="small-caps">Refund summary</div>
+        <div class="mt-3">
+          <div class="summary-row"><span>Amount paid</span><span>{{ quote.amount|inr }}</span></div>
+          <div class="summary-row"><span>Cancellation fee ({{ quote.fee_percent|int }}%)</span><span style="color:var(--danger)">−{{ quote.fee|inr }}</span></div>
+          <div class="summary-row total"><span>Refund to you</span><span style="color:var(--success)">{{ quote.refund|inr }}</span></div>
+        </div>
+
+        <div class="mt-3 p-3 rounded-3" style="background:var(--sky-50);border:1px solid var(--line);font-size:.79rem;color:var(--muted)">
+          <strong style="color:var(--navy)">How refunds work</strong>
+          <ul class="mb-0 mt-2 ps-3">
+            <li>The cancellation fee is {{ quote.fee_percent|int }}% of the total fare.</li>
+            <li>Seats are returned to inventory instantly.</li>
+            <li>Refunds are recorded against your payment as <span class="mono">REFUNDED</span>.</li>
+            <li>Cancellations are only possible before departure.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

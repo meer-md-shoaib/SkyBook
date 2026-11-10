@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Page not found · SkyBook{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="surface surface-pad text-center mx-auto" style="max-width:560px">
+    <div class="section-eyebrow">Error 404</div>
+    <h1 style="font-size:2rem">This page has taken off</h1>
+    <p class="text-muted-2">We couldn't find what you were looking for. Check the link or head back home.</p>
+    <div class="d-flex justify-content-center gap-2">
+      <a href="{{ url_for('main.index') }}" class="btn btn-sky">Return home</a>
+      <a href="{{ url_for('bookings.my_bookings') }}" class="btn btn-ghost">My bookings</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

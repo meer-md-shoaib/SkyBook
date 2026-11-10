@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Select seats · {{ schedule.flight.flight_number }} · SkyBook{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <div class="crumbs mb-2">
+      <a href="{{ url_for('main.index') }}">Home</a> <span class="mx-1">/</span>
+      <a href="{{ url_for('flights.results', source=schedule.flight.source_airport.city, destination=schedule.flight.destination_airport.city, date=schedule.departure_time.strftime('%Y-%m-%d'), passengers=passengers) }}">Results</a>
+      <span class="mx-1">/</span> <span>Seats</span>
+    </div>
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3">
+      <div>
+        <h1>{{ schedule.flight.source_airport.city }} → {{ schedule.flight.destination_airport.city }}</h1>
+        <div class="text-muted-2" style="font-size:.88rem">
+          {{ schedule.flight.airline_name }} {{ schedule.flight.flight_number }} ·
+          {{ schedule.departure_time|datefmt }} at {{ schedule.departure_time|time12 }} ·
+          {{ schedule.flight.aircraft_type }}
+        </div>
+      </div>
+      <span class="countdown" data-countdown="{{ hold_minutes * 60 }}" data-countdown-key="seatstart">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Seats held for <strong>{{ '%02d'|format(hold_minutes) }}:00</strong> after you continue
+      </span>
+    </div>
+  </div>
+</section>
+
+<div class="container py-4">
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="surface surface-lg seat-map-panel">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+          <div>
+            <h3 style="font-size:1.05rem;margin:0">Choose your seats</h3>
+            <p class="text-muted-2 mb-0" style="font-size:.82rem">
+              Select {{ passengers }} seat{{ '' if passengers == 1 else 's' }} for your party.
+            </p>
+          </div>
+          <span class="status-chip neutral"><span id="seatProgress">0 / {{ passengers }}</span> selected</span>
+        </div>
+
+        <div class="legend mt-3">
+          <span class="key"><span class="swatch available"></span> Available</span>
+          <span class="key"><span class="swatch selected" style="background:var(--sky);border-color:var(--sky)"></span> Selected</span>
+          <span class="key"><span class="swatch booked"></span> Booked</span>
+          <span class="key"><span class="swatch business"></span> Business</span>
+          <span class="key"><span class="swatch" style="background:var(--warning-bg);border-color:#f0dcb4"></span> On hold</span>
+        </div>
+
+        <div class="cabin" data-seat-map data-max-seats="{{ passengers }}" data-max-price="0">
+          {% set ns = namespace(last_class='') %}
+          {% for row in rows %}
+            {% if row.seat_class != ns.last_class %}
+              {% set ns.last_class = row.seat_class %}
+              <div class="cabin-section-label">{{ row.seat_class|title }} cabin</div>
+            {% endif %}
+            <div class="seat-row">
+              <span class="row-label">{{ row.number }}</span>
+              {% for seat in row.columns[:3] %}
+                {% include "partials/seat.html" %}
+              {% endfor %}
+              <span></span>
+              {% for seat in row.columns[3:] %}
+                {% include "partials/seat.html" %}
+              {% endfor %}
+            </div>
+          {% endfor %}
+          <div class="cabin-legend-note">Exit rows · front of cabin</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <form id="seatForm" method="post" action="{{ url_for('flights.hold_seats', schedule_id=schedule.schedule_id) }}" class="surface surface-pad surface-lg sticky-panel">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div id="seatIds"></div>
+
+        <div class="small-caps">Your selection</div>
+        <div class="d-flex align-items-baseline justify-content-between mt-2">
+          <span class="text-muted-2" style="font-size:.86rem">Seats chosen</span>
+          <strong style="color:var(--navy)"><span id="selectedCount">0</span> / {{ passengers }}</strong>
+        </div>
+        <div class="d-flex align-items-baseline justify-content-between mt-1">
+          <span class="text-muted-2" style="font-size:.86rem">Total fare</span>
+          <strong id="seatTotal" style="color:var(--navy);font-size:1.2rem">₹0</strong>
+        </div>
+        <div class="text-muted-2 mt-1" style="font-size:.72rem">All taxes and fees included. Fares vary by cabin.</div>
+
+        <div class="alert alert-warning mt-3 mb-0 py-2 px-3" id="seatWarning" style="display:none;font-size:.78rem"></div>
+
+        <div class="mt-3 pt-3" style="border-top:1px dashed var(--line)">
+          <div class="kv"><span class="k">Availability</span><span class="v">{{ counts.available }} seats open</span></div>
+          <div class="kv"><span class="k">Hold duration</span><span class="v">{{ hold_minutes }} minutes</span></div>
+          <div class="kv"><span class="k">Cancellation fee</span><span class="v">{{ config.CANCELLATION_FEE_PERCENT|int }}%</span></div>
+        </div>
+
+        <button type="submit" id="continueBtn" class="btn btn-sky w-100 mt-3" disabled>
+          Continue to passenger details
+        </button>
+        <a href="{{ url_for('flights.details', schedule_id=schedule.schedule_id) }}" class="btn btn-ghost w-100 mt-2">Flight details</a>
+
+        <div class="mt-3" style="font-size:.74rem;color:var(--muted)">
+          Seats are reserved with database-level locking for {{ hold_minutes }} minutes, so nobody else can take them while you finish booking.
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

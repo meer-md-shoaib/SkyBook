@@ -1,0 +1,82 @@
+{% extends "admin/layout.html" %}
+{% block title %}Seat configuration · {{ schedule.flight.flight_number }} · SkyBook admin{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
+  <div>
+    <div class="section-eyebrow">Inventory</div>
+    <h1 style="font-size:1.5rem;margin:0">{{ schedule.flight.flight_number }} · {{ schedule.departure_time|datetimefmt }}</h1>
+    <p class="text-muted-2 mb-0" style="font-size:.85rem">
+      {{ schedule.flight.source_airport.city }} → {{ schedule.flight.destination_airport.city }} ·
+      {{ schedule.flight.aircraft_type }}
+    </p>
+  </div>
+  <a href="{{ url_for('admin.schedules') }}" class="btn btn-ghost btn-sm">Back to schedules</a>
+</div>
+
+<div class="row g-3 mb-4">
+  {% for label, value in [('Total seats', counts.total), ('Business', counts.business), ('Economy', counts.economy), ('Available', counts.available), ('Held', counts.held), ('Booked', counts.booked)] %}
+    <div class="col-6 col-md-2">
+      <div class="surface p-3 h-100">
+        <div class="small-caps">{{ label }}</div>
+        <div style="font-size:1.35rem;font-weight:800;color:var(--navy);letter-spacing:-.03em">{{ value }}</div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-5">
+    <div class="surface surface-pad">
+      <h3 style="font-size:1rem">Regenerate seat map</h3>
+      <p class="text-muted-2" style="font-size:.82rem">
+        Rebuilding deletes every seat on this schedule and creates a fresh layout.
+        This is only allowed when no seat is held or booked.
+      </p>
+      <form method="post" action="{{ url_for('admin.regenerate_seats', schedule_id=schedule.schedule_id) }}"
+            onsubmit="return confirm('Rebuild the seat map for this schedule?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label">Business rows</label>
+            <input class="form-control" type="number" min="0" max="8" name="business_rows" value="3">
+          </div>
+          <div class="col-6">
+            <label class="form-label">Economy rows</label>
+            <input class="form-control" type="number" min="1" max="40" name="economy_rows" value="20">
+          </div>
+        </div>
+        <button class="btn btn-danger-soft mt-3" type="submit">Rebuild seat inventory</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="col-xl-7">
+    <div class="surface surface-pad">
+      <h3 style="font-size:1rem">Seat inventory</h3>
+      <div class="legend mt-2 mb-3">
+        <span class="key"><span class="swatch available"></span> Available</span>
+        <span class="key"><span class="swatch" style="background:var(--warning-bg);border-color:#f0dcb4"></span> Held</span>
+        <span class="key"><span class="swatch booked"></span> Booked</span>
+        <span class="key"><span class="swatch business"></span> Business</span>
+      </div>
+      <div style="max-height:420px;overflow-y:auto">
+        {% set rows = seats|groupby('seat_row') %}
+        {% for row_number, row_seats in rows %}
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <span style="width:26px;font-size:.7rem;color:var(--muted);font-weight:700">{{ row_number }}</span>
+            {% for seat in row_seats %}
+              <span class="status-chip {{ 'neutral' if seat.status == 'AVAILABLE' else ('pending' if seat.status == 'HELD' else 'expired') }}"
+                    style="min-width:44px;justify-content:center;font-size:.64rem">
+                {{ seat.seat_number }}
+              </span>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-muted-2 mb-0" style="font-size:.85rem">No seats exist yet — regenerate the map to create them.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

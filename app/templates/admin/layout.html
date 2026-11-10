@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="admin-shell">
+  {% include "admin/_sidebar.html" %}
+  <div class="admin-main">
+    {% block admin_content %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

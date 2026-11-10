@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}Secure payment · SkyBook{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <div class="crumbs mb-2">
+      <a href="{{ url_for('main.index') }}">Home</a> <span class="mx-1">/</span>
+      <a href="{{ url_for('bookings.my_bookings') }}">My bookings</a> <span class="mx-1">/</span>
+      <span>Payment</span>
+    </div>
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3">
+      <div>
+        <h1>Secure checkout</h1>
+        <div class="text-muted-2" style="font-size:.88rem">
+          Booking {{ booking.booking_reference }} · {{ booking.schedule.flight.flight_number }} ·
+          seats {{ booking.seat_numbers }}
+        </div>
+      </div>
+      <span class="countdown" data-countdown="{{ hold_seconds }}" data-countdown-key="{{ booking.booking_id }}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Seats held for <strong>--:--</strong>
+      </span>
+    </div>
+  </div>
+</section>
+
+<div class="container py-4">
+  {% if payment and payment.payment_status == 'FAILED' %}
+    <div class="alert alert-danger d-flex gap-2 align-items-start">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex:0 0 auto;margin-top:1px"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7.5V13M12 16h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <div>
+        <strong>Payment attempt {{ payment.attempts }} was declined.</strong>
+        <div style="font-size:.85rem">{{ payment.gateway_message or 'The gateway rejected the transaction.' }} Your seats are still held — retry before the timer runs out.</div>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <form method="post" action="{{ url_for('payments.pay', booking_id=booking.booking_id) }}" id="paymentForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="surface surface-pad mb-4">
+          <h3 style="font-size:1.05rem">Choose a payment method</h3>
+          <p class="text-muted-2" style="font-size:.83rem">This checkout is fully simulated for the academic demo.</p>
+
+          <div class="d-grid gap-2 mt-3">
+            {% set methods = [('CARD','Credit / debit card','Visa, Mastercard, RuPay — demo only'),('UPI','UPI','Pay by any UPI ID'),('NETBANKING','Net banking','All major Indian banks'),('WALLET','Wallet','Paytm, PhonePe, Amazon Pay')] %}
+            {% for value, title, sub in methods %}
+              <label class="pay-option">
+                <input type="radio" name="payment_method" value="{{ value }}" {% if loop.first %}checked{% endif %}>
+                <span class="pay-icon">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M3 10h18" stroke="currentColor" stroke-width="1.8"/></svg>
+                </span>
+                <span>
+                  <span class="pay-title d-block">{{ title }}</span>
+                  <span class="pay-sub">{{ sub }}</span>
+                </span>
+              </label>
+            {% endfor %}
+          </div>
+
+          <div class="row g-3 mt-3">
+            <div class="col-md-7">
+              <label class="form-label">Card number (demo)</label>
+              <input class="form-control" type="text" inputmode="numeric" placeholder="4242 4242 4242 4242" maxlength="19" value="4242 4242 4242 4242" autocomplete="off">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Expiry</label>
+              <input class="form-control" type="text" placeholder="12/29" maxlength="5" value="12/29" autocomplete="off">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">CVV</label>
+              <input class="form-control" type="text" placeholder="123" maxlength="4" value="123" autocomplete="off">
+            </div>
+          </div>
+          <div class="mt-2" style="font-size:.72rem;color:var(--muted)">
+            Demo fields are not submitted, stored or validated — no card data ever reaches the server.
+          </div>
+        </div>
+
+        <div class="surface surface-pad">
+          <h3 style="font-size:1.05rem">Demo gateway controls</h3>
+          <p class="text-muted-2" style="font-size:.83rem">
+            Choose what the simulated bank should return so both outcomes can be demonstrated.
+          </p>
+          <div class="d-flex flex-wrap gap-3 mt-2">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="outcome" id="outcomeSuccess" value="success" checked>
+              <label class="form-check-label" for="outcomeSuccess">Successful payment</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="outcome" id="outcomeFailure" value="failure">
+              <label class="form-check-label" for="outcomeFailure">Declined payment</label>
+            </div>
+          </div>
+          <div class="mock-switch mt-3" id="outcomePreview">
+            <strong>Payment will succeed (simulated)</strong><br>
+            <span class="text-muted-2" style="font-size:.8rem">The booking is confirmed and your e-ticket is generated instantly.</span>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-sky w-100 mt-4" style="padding:1rem">
+          Pay {{ booking.total_amount|inr }} securely
+        </button>
+        <div class="text-center mt-2" style="font-size:.74rem;color:var(--muted)">
+          By paying you agree to SkyBook's fare rules and cancellation policy.
+        </div>
+      </form>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="surface surface-pad surface-lg sticky-panel">
+        <div class="small-caps mb-3">Order summary</div>
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <span class="airline-badge">{{ booking.schedule.flight.airline_name[:2]|upper }}</span>
+          <div>
+            <div style="font-weight:700;color:var(--navy);font-size:.9rem">{{ booking.schedule.flight.airline_name }}</div>
+            <div class="text-muted-2" style="font-size:.76rem">{{ booking.schedule.flight.flight_number }} · {{ booking.schedule.flight.aircraft_type }}</div>
+          </div>
+        </div>
+
+        <div class="kv"><span class="k">Route</span><span class="v">{{ booking.schedule.flight.source_airport.airport_code }} → {{ booking.schedule.flight.destination_airport.airport_code }}</span></div>
+        <div class="kv"><span class="k">Departure</span><span class="v">{{ booking.schedule.departure_time|datetimefmt }}</span></div>
+        <div class="kv"><span class="k">Passengers</span><span class="v">{{ booking.passengers|length }}</span></div>
+        <div class="kv"><span class="k">Seats</span><span class="v">{{ booking.seat_numbers }}</span></div>
+
+        <hr style="border-color:var(--line)">
+        {% for link in booking.seat_links if link.is_active %}
+          <div class="summary-row">
+            <span>Seat {{ link.seat.seat_number }} · {{ link.seat.seat_class|title }}</span>
+            <span>{{ link.price|inr }}</span>
+          </div>
+        {% endfor %}
+        <div class="summary-row"><span>Payment attempts</span><span>{{ payment.attempts if payment else 0 }}</span></div>
+        {% if payment %}
+          <div class="summary-row"><span>Transaction</span><span class="mono" style="font-size:.78rem">{{ payment.transaction_reference }}</span></div>
+        {% endif %}
+        <div class="summary-row total"><span>Amount payable</span><span>{{ booking.total_amount|inr }}</span></div>
+
+        <div class="mt-4 p-3 rounded-3" style="background:var(--sky-50);border:1px solid var(--line);font-size:.78rem;color:var(--muted)">
+          <strong style="color:var(--navy)">Held at database level.</strong>
+          Your seats are locked with <span class="mono">SELECT … FOR UPDATE</span> until payment completes or the hold expires.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

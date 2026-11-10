@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}Booking {{ booking.booking_reference }} · SkyBook{% endblock %}
+
+{% block content %}
+<section class="page-head">
+  <div class="container">
+    <div class="crumbs mb-2">
+      <a href="{{ url_for('main.index') }}">Home</a> <span class="mx-1">/</span>
+      <a href="{{ url_for('bookings.my_bookings') }}">My bookings</a> <span class="mx-1">/</span>
+      <span class="mono">{{ booking.booking_reference }}</span>
+    </div>
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3">
+      <div>
+        <h1>{{ booking.schedule.flight.source_airport.city }} → {{ booking.schedule.flight.destination_airport.city }}</h1>
+        <div class="text-muted-2" style="font-size:.88rem">
+          Booked {{ booking.created_at|datefmt }} · {{ booking.schedule.flight.airline_name }}
+          {{ booking.schedule.flight.flight_number }}
+        </div>
+      </div>
+      <span class="status-chip {{ booking.booking_status|lower }}" style="font-size:.76rem">{{ booking.booking_status }}</span>
+    </div>
+  </div>
+</section>
+
+<div class="container py-4">
+  {% if booking.booking_status == 'PENDING' and booking.hold_seconds_remaining %}
+    <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
+      <div>
+        <strong>This booking is awaiting payment.</strong>
+        Your seats are held until the timer runs out.
+      </div>
+      <span class="countdown" data-countdown="{{ booking.hold_seconds_remaining }}" data-countdown-key="{{ booking.booking_id }}">
+        <strong>--:--</strong> remaining
+      </span>
+    </div>
+  {% elif booking.booking_status == 'EXPIRED' %}
+    <div class="alert alert-danger">This booking expired because payment was not completed in time.</div>
+  {% elif booking.booking_status == 'CANCELLED' %}
+    <div class="alert alert-danger">
+      This booking was cancelled on {{ booking.cancellation.cancellation_date|datefmt if booking.cancellation else '—' }}.
+      {% if booking.cancellation %}
+        Refund recorded: <strong>{{ booking.cancellation.refund_amount|inr }}</strong>
+        ({{ booking.cancellation.refund_status|title }}).
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="surface surface-pad surface-lg mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3 style="font-size:1.02rem;margin:0">Flight</h3>
+          <span class="status-chip neutral">{{ booking.schedule.status }}</span>
+        </div>
+        <div class="itinerary">
+          <div class="itin-point">
+            <div class="code">{{ booking.schedule.flight.source_airport.airport_code }}</div>
+            <div class="city">{{ booking.schedule.flight.source_airport.city }}</div>
+            <div class="when">{{ booking.schedule.departure_time|time12 }}</div>
+          </div>
+          <div class="itin-line">
+            <span>{{ booking.schedule.duration_label }}</span>
+            <div class="bar"><i>✈</i></div>
+            <span>Non-stop</span>
+          </div>
+          <div class="itin-point text-end">
+            <div class="code">{{ booking.schedule.flight.destination_airport.airport_code }}</div>
+            <div class="city">{{ booking.schedule.flight.destination_airport.city }}</div>
+            <div class="when">{{ booking.schedule.arrival_time|time12 }}</div>
+          </div>
+        </div>
+        <hr class="my-4" style="border-color:var(--line)">
+        <div class="row g-3" style="font-size:.86rem">
+          <div class="col-sm-6"><span class="small-caps d-block">Date</span>{{ booking.schedule.departure_time|datefmt }}</div>
+          <div class="col-sm-6"><span class="small-caps d-block">Aircraft</span>{{ booking.schedule.flight.aircraft_type }}</div>
+          <div class="col-sm-6"><span class="small-caps d-block">Seats</span>{{ booking.seat_numbers or '—' }}</div>
+          <div class="col-sm-6"><span class="small-caps d-block">Reference</span><span class="mono">{{ booking.booking_reference }}</span></div>
+        </div>
+      </div>
+
+      <div class="surface surface-pad mb-4">
+        <h3 style="font-size:1.02rem">Passengers</h3>
+        {% if booking.passengers %}
+          <div class="table-responsive mt-2">
+            <table class="table table-skybook">
+              <thead><tr><th>Name</th><th>Gender</th><th>Age</th><th>Seat</th><th>ID</th></tr></thead>
+              <tbody>
+                {% for passenger in booking.passengers %}
+                  <tr>
+                    <td style="font-weight:700;color:var(--navy)">{{ passenger.full_name }}</td>
+                    <td>{{ passenger.gender|title }}</td>
+                    <td>{{ passenger.age }}</td>
+                    <td>{{ passenger.seat.seat_number if passenger.seat else '—' }}</td>
+                    <td class="mono">{{ passenger.masked_id }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="text-muted-2 mb-0" style="font-size:.88rem">Passenger details are not captured yet.</p>
+        {% endif %}
+      </div>
+
+      {% if booking.cancellation %}
+        <div class="surface surface-pad">
+          <h3 style="font-size:1.02rem">Cancellation</h3>
+          <div class="kv"><span class="k">Reason</span><span class="v">{{ booking.cancellation.cancellation_reason }}</span></div>
+          <div class="kv"><span class="k">Cancelled on</span><span class="v">{{ booking.cancellation.cancellation_date|datetimefmt }}</span></div>
+          <div class="kv"><span class="k">Refund</span><span class="v">{{ booking.cancellation.refund_amount|inr }} · {{ booking.cancellation.refund_status|title }}</span></div>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="col-lg-5">
+      <div class="surface surface-pad surface-lg mb-4">
+        <div class="small-caps mb-2">Payment</div>
+        {% if booking.payment %}
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="status-chip {{ booking.payment.payment_status|lower }}">{{ booking.payment.payment_status }}</span>
+            <span class="mono" style="font-size:.74rem;color:var(--muted)">{{ booking.payment.transaction_reference }}</span>
+          </div>
+          <div class="kv"><span class="k">Method</span><span class="v">{{ booking.payment.payment_method|title }}</span></div>
+          <div class="kv"><span class="k">Attempts</span><span class="v">{{ booking.payment.attempts }}</span></div>
+          <div class="kv"><span class="k">Paid on</span><span class="v">{{ booking.payment.payment_time|datetimefmt }}</span></div>
+          <div class="kv"><span class="k">Message</span><span class="v" style="max-width:60%;font-weight:500">{{ booking.payment.gateway_message }}</span></div>
+        {% else %}
+          <p class="text-muted-2 mb-0" style="font-size:.88rem">No payment has been attempted yet.</p>
+        {% endif %}
+        <div class="summary-row total"><span>Total</span><span>{{ booking.total_amount|inr }}</span></div>
+
+        {% if booking.booking_status == 'PENDING' %}
+          <a href="{{ url_for('payments.checkout', booking_id=booking.booking_id) }}" class="btn btn-sky w-100 mt-3">Complete payment</a>
+        {% endif %}
+      </div>
+
+      <div class="surface surface-pad">
+        <div class="small-caps mb-2">Actions</div>
+        {% if booking.booking_status == 'CONFIRMED' %}
+          <a href="{{ url_for('tickets.download', booking_id=booking.booking_id) }}" class="btn btn-navy w-100 mb-2">Download e-ticket</a>
+          <a href="{{ url_for('bookings.confirmation', booking_id=booking.booking_id) }}" class="btn btn-ghost w-100 mb-2">View boarding pass</a>
+          {% if eligible %}
+            <a href="{{ url_for('bookings.cancel', booking_id=booking.booking_id) }}" class="btn btn-danger-soft w-100">Cancel booking</a>
+            {% if quote %}
+              <div class="mt-2 text-center" style="font-size:.74rem;color:var(--muted)">
+                Refund estimate {{ quote.refund|inr }} after a {{ quote.fee_percent|int }}% fee ({{ quote.fee|inr }}).
+              </div>
+            {% endif %}
+          {% else %}
+            <div class="alert alert-info mb-0 mt-2" style="font-size:.8rem">{{ eligibility_reason }}</div>
+          {% endif %}
+        {% elif booking.booking_status == 'CANCELLED' %}
+          <p class="text-muted-2 mb-0" style="font-size:.86rem">This booking cannot be cancelled again.</p>
+        {% else %}
+          <p class="text-muted-2 mb-0" style="font-size:.86rem">{{ eligibility_reason }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

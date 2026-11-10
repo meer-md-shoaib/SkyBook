@@ -1,0 +1,67 @@
+{% extends "admin/layout.html" %}
+{% block title %}Bookings · SkyBook admin{% endblock %}
+
+{% block admin_content %}
+<div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
+  <div>
+    <div class="section-eyebrow">Reservations</div>
+    <h1 style="font-size:1.6rem;margin:0">Bookings</h1>
+    <p class="text-muted-2 mb-0" style="font-size:.85rem">Every reservation across all passengers and flights.</p>
+  </div>
+</div>
+
+<div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+  <a href="{{ url_for('admin.bookings') }}" class="btn btn-sm {{ '' if status else 'btn-navy' }}{{ ' btn-ghost' if status else '' }}">All</a>
+  {% for key in ['PENDING','CONFIRMED','CANCELLED','EXPIRED'] %}
+    <a href="{{ url_for('admin.bookings', status=key) }}"
+       class="btn btn-sm {{ 'btn-navy' if status == key else 'btn-ghost' }}">
+      {{ key|title }} <span style="opacity:.7">· {{ counts[key] }}</span>
+    </a>
+  {% endfor %}
+
+  <form class="ms-auto d-flex gap-2" method="get" action="{{ url_for('admin.bookings') }}">
+    <input type="hidden" name="status" value="{{ status }}">
+    <input class="form-control form-control-sm" name="q" value="{{ search }}" placeholder="Search reference…" style="min-width:190px">
+    <button class="btn btn-ghost btn-sm" type="submit">Search</button>
+  </form>
+</div>
+
+<div class="surface">
+  <div class="table-responsive">
+    <table class="table table-skybook">
+      <thead>
+        <tr><th>Reference</th><th>Passenger</th><th>Flight</th><th>Departure</th><th>Seats</th><th>Payment</th><th>Status</th><th class="text-end">Total</th></tr>
+      </thead>
+      <tbody>
+        {% for booking in bookings %}
+          <tr>
+            <td>
+              <a class="mono" href="{{ url_for('admin.booking_detail', booking_id=booking.booking_id) }}" style="font-weight:700">{{ booking.booking_reference }}</a>
+              <div class="text-muted-2" style="font-size:.72rem">{{ booking.created_at|datefmt }}</div>
+            </td>
+            <td>{{ booking.user.name }}
+              <div class="text-muted-2" style="font-size:.72rem">{{ booking.user.email }}</div>
+            </td>
+            <td>{{ booking.schedule.flight.flight_number }}
+              <div class="text-muted-2" style="font-size:.72rem">{{ booking.schedule.flight.source_airport.airport_code }} → {{ booking.schedule.flight.destination_airport.airport_code }}</div>
+            </td>
+            <td>{{ booking.schedule.departure_time|datetimefmt }}</td>
+            <td>{{ booking.seat_numbers or '—' }}</td>
+            <td>
+              {% if booking.payment %}
+                <span class="status-chip {{ booking.payment.payment_status|lower }}">{{ booking.payment.payment_status }}</span>
+              {% else %}
+                <span class="text-muted-2" style="font-size:.78rem">—</span>
+              {% endif %}
+            </td>
+            <td><span class="status-chip {{ booking.booking_status|lower }}">{{ booking.booking_status }}</span></td>
+            <td class="text-end" style="font-weight:700;color:var(--navy)">{{ booking.total_amount|inr }}</td>
+          </tr>
+        {% else %}
+          <tr><td colspan="8" class="text-center text-muted-2 py-4">No bookings match these filters.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
