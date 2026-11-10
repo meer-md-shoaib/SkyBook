@@ -157,13 +157,50 @@
     const paint = () => {
       document.querySelectorAll(".pay-option").forEach((option) => {
         const radio = option.querySelector("input[type='radio']");
-        option.style.borderColor = radio && radio.checked ? "var(--sky)" : "var(--line)";
-        option.style.background = radio && radio.checked ? "var(--sky-50)" : "#fff";
+        option.style.borderColor = radio && radio.checked ? "var(--sky)" : "";
+        option.style.background = radio && radio.checked ? "var(--sky-50)" : "";
       });
     };
     input.addEventListener("change", paint);
     paint();
   });
+
+  /* -------------------------- dark mode toggle -------------------------- */
+  const themeToggle = document.getElementById("themeToggle");
+  if (themeToggle) {
+    const getStoredTheme = () => {
+      try {
+        return localStorage.getItem("skybook_theme");
+      } catch (e) {
+        return null;
+      }
+    };
+
+    const setStoredTheme = (theme) => {
+      try {
+        localStorage.setItem("skybook_theme", theme);
+      } catch (e) {}
+    };
+
+    const applyTheme = (theme) => {
+      document.documentElement.setAttribute("data-theme", theme);
+      themeToggle.setAttribute("aria-label", "Switch to " + (theme === "dark" ? "light" : "dark") + " mode");
+      themeToggle.setAttribute("title", "Switch to " + (theme === "dark" ? "light" : "dark") + " mode");
+    };
+
+    themeToggle.addEventListener("click", () => {
+      const current = document.documentElement.getAttribute("data-theme") || "light";
+      const next = current === "dark" ? "light" : "dark";
+      applyTheme(next);
+      setStoredTheme(next);
+    });
+
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+      if (!getStoredTheme()) {
+        applyTheme(e.matches ? "dark" : "light");
+      }
+    });
+  }
 
   /* --------------------------- swap locations --------------------------- */
   const swap = document.getElementById("swapLocations");
