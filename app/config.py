@@ -4,7 +4,12 @@ from datetime import timedelta
 
 
 def _db_uri(name: str) -> str:
-    """Build a PyMySQL SQLAlchemy URI from individual env vars."""
+    """Build a PyMySQL SQLAlchemy URI from individual env vars or full URL."""
+    uri = os.getenv("DATABASE_URL") or os.getenv("MYSQL_URL")
+    if uri:
+        if uri.startswith("mysql://"):
+            uri = uri.replace("mysql://", "mysql+pymysql://", 1)
+        return uri
     user = os.getenv("DB_USER", "root")
     password = os.getenv("DB_PASSWORD", "")
     host = os.getenv("DB_HOST", "localhost")
