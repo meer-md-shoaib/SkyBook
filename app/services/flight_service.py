@@ -11,8 +11,9 @@ class FlightService:
         self.repo = repo or FlightRepository()
 
     # ---- lookups ----------------------------------------------------------
-    def cities(self) -> list[str]:
-        return self.repo.list_cities()
+    def cities(self):
+        """Return all available airports/cities for route dropdowns."""
+        return self.repo.list_airports()
 
     def airlines(self) -> list[str]:
         return self.repo.list_airlines()
