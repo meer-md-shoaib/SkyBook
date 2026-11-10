@@ -26,6 +26,12 @@ def index():
     )
 
 
+@main_bp.route("/services")
+def services():
+    """Dedicated travel services and amenities showcase page."""
+    return render_template("services.html")
+
+
 @main_bp.route("/health")
 def health():
     return jsonify({"status": "ok", "app": "SkyBook"})
