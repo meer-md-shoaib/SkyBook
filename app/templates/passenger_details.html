@@ -59,7 +59,7 @@
               <div class="col-md-6">
                 <label class="form-label" for="date_of_birth_{{ index }}">Date of birth</label>
                 <input class="form-control" id="date_of_birth_{{ index }}" name="date_of_birth_{{ index }}" type="date"
-                       value="{{ pax.get('date_of_birth', '') }}" max="{{ now.strftime('%Y-%m-%d') }}" required>
+                       value="{{ pax.get('date_of_birth', '') }}" min="1900-01-01" max="{{ now.strftime('%Y-%m-%d') }}" required>
               </div>
               <div class="col-md-4">
                 <label class="form-label" for="gender_{{ index }}">Gender</label>

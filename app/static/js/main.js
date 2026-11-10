@@ -216,7 +216,7 @@
   }
 
   /* ----------------------------- date guard ---------------------------- */
-  document.querySelectorAll("input[type='date']").forEach((input) => {
+  document.querySelectorAll("input[type='date']:not([name*='birth']):not([name*='dob'])").forEach((input) => {
     if (!input.min) {
       input.min = new Date().toISOString().split("T")[0];
     }
