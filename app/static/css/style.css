@@ -512,6 +512,116 @@ a:hover { color: var(--navy); }
   border-bottom-color: var(--line);
 }
 
+/* ----------------------------- dark theme: forms & controls ----------- */
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+  background-color: var(--bg-card);
+  color: var(--ink);
+  border-color: var(--line);
+}
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus {
+  background-color: var(--bg-card);
+  color: var(--ink);
+  border-color: var(--sky);
+}
+[data-theme="dark"] .form-control::placeholder {
+  color: #64748b;
+}
+[data-theme="dark"] .search-field select,
+[data-theme="dark"] .search-field input {
+  color: var(--ink);
+}
+[data-theme="dark"] .search-field select option {
+  background-color: var(--bg-card);
+  color: var(--ink);
+}
+[data-theme="dark"] .table-skybook thead th {
+  background: var(--bg-subtle);
+  color: var(--muted);
+  border-bottom-color: var(--line);
+}
+[data-theme="dark"] .table-skybook tbody td {
+  border-color: var(--line);
+  color: var(--ink);
+}
+[data-theme="dark"] .table-skybook tbody tr:hover {
+  background: var(--bg-subtle);
+}
+[data-theme="dark"] .cabin {
+  background: var(--bg-card);
+  border-color: var(--line);
+}
+[data-theme="dark"] .seat {
+  background: #1e293b;
+  border-color: #334155;
+  color: #cbd5e1;
+}
+[data-theme="dark"] .seat.business {
+  background: #1a2744;
+  border-color: #2b3e66;
+}
+[data-theme="dark"] .seat.booked {
+  background: #0f172a;
+  border-color: #1e293b;
+  color: #475569;
+}
+[data-theme="dark"] .pay-option {
+  background: var(--bg-surface);
+  border-color: var(--line);
+}
+[data-theme="dark"] .pay-option:hover {
+  background: var(--bg-subtle);
+}
+[data-theme="dark"] .ticket-stub {
+  background: var(--bg-surface);
+  border-color: var(--line);
+}
+[data-theme="dark"] .perforation::before,
+[data-theme="dark"] .perforation::after {
+  background: var(--bg-body);
+  border-color: var(--line);
+}
+[data-theme="dark"] .qr {
+  background: #fff;
+  border-color: var(--line);
+}
+
+/* ----------------------------- theme toggle button -------------------- */
+.theme-toggle-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1.5px solid var(--line);
+  background: var(--bg-card);
+  color: var(--navy);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  padding: 0;
+}
+.theme-toggle-btn:hover {
+  border-color: var(--sky);
+  color: var(--sky);
+  transform: translateY(-1px);
+}
+.theme-toggle-btn svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.25s ease;
+}
+.theme-toggle-btn .icon-moon { display: block; }
+.theme-toggle-btn .icon-sun { display: none; }
+[data-theme="dark"] .theme-toggle-btn {
+  background: var(--bg-card);
+  border-color: var(--line);
+  color: #fbbf24;
+}
+[data-theme="dark"] .theme-toggle-btn .icon-moon { display: none; }
+[data-theme="dark"] .theme-toggle-btn .icon-sun { display: block; }
+
 /* ------------------------------ seat map ------------------------------- */
 .seat-map-panel { padding: 1.6rem 1.25rem; }
 .cabin {
