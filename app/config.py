@@ -21,7 +21,7 @@ class BaseConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         "pool_pre_ping": True,
-        "pool_recycle": 280,
+        "pool_recycle": 3600,
         "isolation_level": "READ COMMITTED",
     }
 
@@ -57,6 +57,7 @@ class TestingConfig(BaseConfig):
 class ProductionConfig(BaseConfig):
     DEBUG = False
     ENV = "production"
+    SESSION_COOKIE_SECURE = True
 
 
 CONFIG_MAP = {

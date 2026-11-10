@@ -24,6 +24,7 @@ def _get_booking(booking_id: int):
 @payments_bp.route("/<int:booking_id>")
 @login_required
 def checkout(booking_id: int):
+    """Render simulated payment checkout screen with card/UPI and outcome choices."""
     booking = _get_booking(booking_id)
     if booking.booking_status == "CONFIRMED":
         return redirect(url_for("bookings.confirmation", booking_id=booking.booking_id))
@@ -48,6 +49,7 @@ def checkout(booking_id: int):
 @payments_bp.route("/<int:booking_id>/pay", methods=["POST"])
 @login_required
 def pay(booking_id: int):
+    """Execute simulated charge; confirm booking on success or retain pending on failure."""
     outcome = request.form.get("outcome", "success")
     method = request.form.get("payment_method", "CARD")
     simulate_failure = outcome == "failure"

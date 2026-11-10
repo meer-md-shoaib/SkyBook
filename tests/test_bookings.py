@@ -92,10 +92,11 @@ def test_passenger_count_must_match_seats(
 def test_expired_hold_releases_seats(
     app, passenger, schedule, available_seats, make_booking
 ):
-    from datetime import datetime, timedelta
+    from datetime import timedelta
+    from app.utils.helpers import utcnow
 
     booking = make_booking(passenger, schedule, available_seats[:1])
-    booking.hold_expires_at = datetime.utcnow() - timedelta(minutes=1)
+    booking.hold_expires_at = utcnow() - timedelta(minutes=1)
     db.session.commit()
 
     released = BookingService().expire_stale_holds()
@@ -134,4 +135,23 @@ def test_hold_route_creates_booking_and_redirects(
     )
     assert response.status_code == 302
     assert "/passengers" in response.headers["Location"]
-    assert Booking.query.filter_by(user_id=passenger.user_id, booking_status="PENDING").count() >= 1
+
+
+def test_max_seats_exceeded_raises_error(passenger, schedule, available_seats, app):
+    import pytest
+    from app.services.booking_service import BookingError, BookingService
+    from app.models import Booking, Seat
+
+    all_seats = (
+        Seat.query.filter_by(schedule_id=schedule.schedule_id, status=Seat.STATUS_AVAILABLE)
+        .limit(7)
+        .all()
+    )
+    if len(all_seats) >= 7:
+        with pytest.raises(BookingError, match="at most 6 seats"):
+            BookingService().create_pending_booking(
+                user=passenger,
+                schedule_id=schedule.schedule_id,
+                seat_ids=[s.seat_id for s in all_seats],
+            )
+        assert Booking.query.filter_by(user_id=passenger.user_id, booking_status="PENDING").count() == 0

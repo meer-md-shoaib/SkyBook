@@ -2,6 +2,7 @@
 from datetime import datetime
 
 from app.extensions import db
+from app.utils.helpers import utcnow
 
 
 class FlightSchedule(db.Model):
@@ -29,7 +30,7 @@ class FlightSchedule(db.Model):
         default=STATUS_SCHEDULED,
         index=True,
     )
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
 
     flight = db.relationship("Flight", back_populates="schedules")
     seats = db.relationship(

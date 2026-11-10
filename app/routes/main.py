@@ -15,7 +15,8 @@ def index():
     try:
         BookingService().expire_stale_holds()
     except Exception:  # pragma: no cover - never block the landing page
-        pass
+        from flask import current_app
+        current_app.logger.warning("Failed to expire stale holds on index", exc_info=True)
     return render_template(
         "index.html",
         cities=service.cities(),

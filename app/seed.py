@@ -10,6 +10,7 @@ from app.models import (
     Airport, Booking, BookingSeat, Flight, FlightSchedule, Passenger, Payment, Seat, Ticket, User,
 )
 from app.services.ticket_service import TicketService
+from app.utils.helpers import utcnow
 
 AIRPORTS = [
     ("BLR", "Kempegowda International Airport", "Bengaluru"),
@@ -154,7 +155,7 @@ def _seed_demo_booking(users: dict) -> None:
         FlightSchedule.query.join(Flight)
         .filter(
             Flight.flight_number == "6E 204",
-            FlightSchedule.departure_time >= datetime.utcnow() + timedelta(hours=6),
+            FlightSchedule.departure_time >= utcnow() + timedelta(hours=6),
         )
         .order_by(FlightSchedule.departure_time.asc())
         .first()
@@ -222,14 +223,14 @@ def _seed_demo_booking(users: dict) -> None:
             payment_status=Payment.STATUS_SUCCESS,
             gateway_message="Seeded demo payment.",
             attempts=1,
-            payment_time=datetime.utcnow(),
+            payment_time=utcnow(),
         )
     )
     db.session.add(
         Ticket(
             booking_id=booking.booking_id,
             ticket_number="TKT-0000000001",
-            generated_at=datetime.utcnow(),
+            generated_at=utcnow(),
         )
     )
     db.session.commit()

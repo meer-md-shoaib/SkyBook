@@ -89,3 +89,17 @@ def test_gateway_callback_is_idempotent(
 def test_callback_rejects_unknown_reference(client, app):
     response = client.post("/payments/callback", json={"transaction_reference": "TXNUNKNOWN"})
     assert response.status_code == 404
+
+
+def test_payment_on_expired_hold_fails(app, passenger, schedule, available_seats, make_booking):
+    from datetime import timedelta
+    from app.utils.helpers import utcnow
+
+    booking = make_booking(passenger, schedule, available_seats[:1])
+    booking.hold_expires_at = utcnow() - timedelta(minutes=5)
+    db.session.commit()
+
+    result = PaymentService().process_payment(booking.booking_id, passenger)
+    assert result.success is False
+    assert "expired" in result.message.lower()
+

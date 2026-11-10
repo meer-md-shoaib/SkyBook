@@ -67,3 +67,11 @@ def test_cancel_route_requires_confirmation(
     assert b"confirm the cancellation" in response.data
     db.session.refresh(booking)
     assert booking.booking_status == Booking.STATUS_CONFIRMED
+
+
+def test_cannot_cancel_pending_booking(app, passenger, schedule, available_seats, make_booking):
+    booking = make_booking(passenger, schedule, available_seats[:1])
+    service = CancellationService()
+    with pytest.raises(CancellationError, match="Only confirmed bookings"):
+        service.cancel(booking)
+

@@ -4,6 +4,7 @@ import string
 from datetime import datetime
 
 from app.extensions import db
+from app.utils.helpers import utcnow
 
 
 def generate_ticket_number() -> str:
@@ -23,7 +24,7 @@ class Ticket(db.Model):
         db.String(20), nullable=False, unique=True, index=True,
         default=generate_ticket_number,
     )
-    generated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    generated_at = db.Column(db.DateTime, nullable=False, default=utcnow)
     file_path = db.Column(db.String(255), nullable=True)
 
     booking = db.relationship("Booking", back_populates="ticket")

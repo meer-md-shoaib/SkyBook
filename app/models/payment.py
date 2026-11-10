@@ -2,6 +2,7 @@
 from datetime import datetime
 
 from app.extensions import db
+from app.utils.helpers import utcnow
 
 
 class Payment(db.Model):
@@ -30,9 +31,9 @@ class Payment(db.Model):
     gateway_message = db.Column(db.String(255), nullable=True)
     attempts = db.Column(db.Integer, nullable=False, default=0)
     payment_time = db.Column(db.DateTime, nullable=True)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
     updated_at = db.Column(
-        db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+        db.DateTime, nullable=False, default=utcnow, onupdate=utcnow
     )
 
     booking = db.relationship("Booking", back_populates="payment")

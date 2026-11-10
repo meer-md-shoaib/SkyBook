@@ -6,6 +6,7 @@ from flask import (
 )
 from flask_login import login_required
 from sqlalchemy import func
+from sqlalchemy.orm import joinedload
 
 from app.extensions import db
 from app.models import (
@@ -17,6 +18,7 @@ from app.repositories.user_repository import UserRepository
 from app.services.booking_service import BookingService
 from app.services.seat_service import SeatLayoutError, SeatService
 from app.utils.decorators import admin_required
+from app.utils.helpers import utcnow
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -43,13 +45,15 @@ def _fmt_input(value: datetime | None) -> str:
 @login_required
 @admin_required
 def dashboard():
+    from flask import current_app
+
     try:
         BookingService().expire_stale_holds()
     except Exception:  # pragma: no cover
-        pass
+        current_app.logger.warning("Failed to expire stale holds on admin dashboard", exc_info=True)
 
     stats = booking_repo.stats()
-    now = datetime.utcnow()
+    now = utcnow()
     upcoming = FlightSchedule.query.filter(
         FlightSchedule.departure_time >= now,
         FlightSchedule.status == FlightSchedule.STATUS_SCHEDULED,
@@ -98,7 +102,10 @@ def dashboard():
 @admin_required
 def flights():
     all_flights = (
-        Flight.query.join(Airport, Flight.source_airport_id == Airport.airport_id)
+        Flight.query.options(
+            joinedload(Flight.source_airport),
+            joinedload(Flight.destination_airport),
+        )
         .order_by(Flight.flight_number.asc())
         .all()
     )
@@ -205,7 +212,10 @@ def toggle_flight(flight_id: int):
 @admin_required
 def schedules():
     rows = (
-        FlightSchedule.query.join(Flight)
+        FlightSchedule.query.options(
+            joinedload(FlightSchedule.flight).joinedload(Flight.source_airport),
+            joinedload(FlightSchedule.flight).joinedload(Flight.destination_airport),
+        )
         .order_by(FlightSchedule.departure_time.asc())
         .all()
     )
@@ -351,11 +361,15 @@ def regenerate_seats(schedule_id: int):
 def bookings():
     status = request.args.get("status", "").upper()
     search = (request.args.get("q") or "").strip()
-    query = Booking.query
+    query = Booking.query.options(
+        joinedload(Booking.user),
+        joinedload(Booking.schedule).joinedload(FlightSchedule.flight),
+    )
     if status:
         query = query.filter(Booking.booking_status == status)
     if search:
-        query = query.filter(Booking.booking_reference.ilike(f"%{search}%"))
+        safe_search = search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        query = query.filter(Booking.booking_reference.ilike(f"%{safe_search}%", escape="\\"))
     rows = query.order_by(Booking.created_at.desc()).limit(200).all()
     return render_template(
         "admin/bookings.html",

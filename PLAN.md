@@ -117,6 +117,16 @@ All phases above are implemented and verified against MySQL/MariaDB 10.4.
 - `database/schema.sql` + `database/seed.sql` restore into a scratch database
   with the expected row counts (6 airports, 12 flights, 120 schedules, 15,840
   seats, 3 users, 1 demo booking).
-- Test suite: **32 passed in 121.00s** (`python -m pytest tests -q`).
+- Test suite: **40 passed in 210.16s** (`python -m pytest tests -q`).
+
+**Hardening & Improvements (2026-11-10)**
+
+- **Python 3.12+ Deprecation Fix**: Replaced all 27 occurrences of deprecated `datetime.utcnow()` with naive-UTC `utcnow()` across models, repositories, routes, and services.
+- **Production Assertion**: Replaced stripped `assert released >= 0` in `cancellation_service.py` with runtime exception.
+- **Route & Performance Optimizations**: Removed redundant double-search in flight search; added eager loading (`joinedload`) across admin queries; reduced MySQL connection pool churn (`pool_recycle` changed from 280 to 3600 seconds).
+- **Security Hardening**: Enforced uppercase + lowercase + digit requirements on user passwords; escaped LIKE wildcards in admin booking searches; made sign-out POST-only with CSRF token; added `SESSION_COOKIE_SECURE` for production; documented `FLASK_APP=run.py` in `.env.example`.
+- **Error Handling & Observability**: Replaced silent exception swallowing with structured logging in hold sweeper routes; narrowed database rollback handlers.
+- **Test Suite Expansion**: Added admin route tests, edge cases (seat limits, weak passwords, expired holds during checkout, duplicate emails), expanding passing test count from 32 to 40.
+- **Version Control**: Git repository initialized and published to GitHub `meer-md-shoaib/SkyBook`.
 
 **Not included:** UI screenshots.

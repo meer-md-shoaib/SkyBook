@@ -10,6 +10,7 @@ from reportlab.pdfgen import canvas
 
 from app.extensions import db
 from app.models import Ticket
+from app.utils.helpers import utcnow
 
 NAVY = HexColor("#0B2A4A")
 SKY = HexColor("#2E86DE")
@@ -43,7 +44,7 @@ class TicketService:
         path = os.path.join(self.output_dir(), filename)
         self._render(booking, ticket, path)
         ticket.file_path = filename
-        ticket.generated_at = datetime.utcnow()
+        ticket.generated_at = utcnow()
         db.session.add(ticket)
         return ticket
 

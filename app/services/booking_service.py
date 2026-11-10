@@ -8,6 +8,7 @@ from app.extensions import db
 from app.models import Booking, BookingSeat, Passenger, Seat
 from app.repositories.booking_repository import BookingRepository
 from app.repositories.flight_repository import FlightRepository
+from app.utils.helpers import utcnow
 from app.utils.validators import validate_booking_contact, validate_passenger
 
 
@@ -63,7 +64,7 @@ class BookingService:
         schedule = self.flight_repo.get_schedule(schedule_id)
         if not schedule:
             raise BookingError("That flight is no longer available.")
-        if schedule.status != "SCHEDULED" or schedule.departure_time <= datetime.utcnow():
+        if schedule.status != "SCHEDULED" or schedule.departure_time <= utcnow():
             raise BookingError("This flight has already departed or is not open for booking.")
         if schedule.flight.source_airport_id == schedule.flight.destination_airport_id:
             raise BookingError("Invalid route.")
@@ -90,7 +91,7 @@ class BookingService:
             contact_email=contact_email,
             contact_phone=contact_phone,
             total_amount=0,
-            hold_expires_at=datetime.utcnow() + timedelta(minutes=hold_minutes),
+            hold_expires_at=utcnow() + timedelta(minutes=hold_minutes),
         )
         db.session.add(booking)
         try:
@@ -130,7 +131,8 @@ class BookingService:
         except IntegrityError:
             db.session.rollback()
             raise BookingError("Those seats were just reserved by another passenger.")
-        except Exception:
+        except Exception as exc:
+            current_app.logger.exception("Booking creation failed: %s", exc)
             db.session.rollback()
             raise
 
@@ -181,7 +183,8 @@ class BookingService:
             )
         try:
             db.session.commit()
-        except Exception:
+        except Exception as exc:
+            current_app.logger.exception("Saving passengers failed: %s", exc)
             db.session.rollback()
             raise
         return []

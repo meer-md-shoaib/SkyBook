@@ -11,6 +11,7 @@ from app.extensions import db
 from app.models import Booking, Payment
 from app.services.booking_service import BookingService
 from app.services.ticket_service import TicketService
+from app.utils.helpers import utcnow
 
 
 @dataclass
@@ -137,7 +138,7 @@ class PaymentService:
         strategy = PaymentStrategyFactory.create(simulate_failure)
         outcome = strategy.charge(float(booking.total_amount), payment.payment_method, payment.transaction_reference)
         payment.gateway_message = outcome.message
-        payment.payment_time = datetime.utcnow()
+        payment.payment_time = utcnow()
 
         if outcome.success:
             payment.payment_status = Payment.STATUS_SUCCESS

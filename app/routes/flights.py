@@ -30,10 +30,17 @@ def search():
 
 @flights_bp.route("/results")
 def results():
+    from flask import current_app
+
     source = request.args.get("source", "")
     destination = request.args.get("destination", "")
     travel_date = request.args.get("date", "")
     passengers = request.args.get("passengers", "1")
+
+    try:
+        booking_service.expire_stale_holds()
+    except Exception:  # pragma: no cover
+        current_app.logger.warning("Failed to expire stale holds before search", exc_info=True)
 
     outcome = flight_service.search(
         source=source,
@@ -44,23 +51,6 @@ def results():
         max_price=request.args.get("max_price") or None,
         departure_window=request.args.get("departure_window") or None,
     )
-
-    try:
-        BookingService().expire_stale_holds()
-    except Exception:  # pragma: no cover
-        pass
-
-    # Re-run search after expiring holds so availability is fresh.
-    if outcome["flights"]:
-        outcome = flight_service.search(
-            source=source,
-            destination=destination,
-            travel_date=travel_date,
-            passengers=passengers,
-            airline=request.args.get("airline") or None,
-            max_price=request.args.get("max_price") or None,
-            departure_window=request.args.get("departure_window") or None,
-        )
 
     return render_template(
         "flights.html",
@@ -89,9 +79,9 @@ def seats(schedule_id: int):
 
     # Refresh availability before rendering (expired holds become free again).
     try:
-        BookingService().expire_stale_holds()
+        booking_service.expire_stale_holds()
     except Exception:  # pragma: no cover
-        pass
+        current_app.logger.warning("Failed to expire stale holds in seat map", exc_info=True)
 
     seat_data = flight_service.seat_map(schedule_id)
     passengers = request.args.get("passengers", "1")
@@ -130,6 +120,8 @@ def hold_seats(schedule_id: int):
         flash(str(exc), "danger")
         return redirect(url_for("flights.seats", schedule_id=schedule_id))
     except Exception as exc:  # pragma: no cover
+        from flask import current_app
+        current_app.logger.exception("Failed to hold seats: %s", exc)
         flash("We could not hold those seats. Please try again.", "danger")
         return redirect(url_for("flights.seats", schedule_id=schedule_id))
 
@@ -143,7 +135,13 @@ def hold_seats(schedule_id: int):
 
 @flights_bp.route("/<int:schedule_id>/availability")
 def availability(schedule_id: int):
-    """JSON availability used by the seat map for live refreshes."""
+    """JSON availability endpoint used by the seat map for live refreshes.
+
+    Returns:
+        JSON object with:
+            counts (dict): Total, available, held, and booked seat tallies.
+            seats (list[dict]): Array of seat objects with 'id', 'number', and 'status'.
+    """
     data = flight_service.seat_map(schedule_id)
     if not data:
         return jsonify({"error": "not found"}), 404

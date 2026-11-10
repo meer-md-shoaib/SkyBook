@@ -2,6 +2,7 @@
 from datetime import datetime
 
 from app.extensions import db
+from app.utils.helpers import utcnow
 
 
 class Cancellation(db.Model):
@@ -18,7 +19,7 @@ class Cancellation(db.Model):
     )
     cancellation_reason = db.Column(db.String(255), nullable=True)
     refund_amount = db.Column(db.Numeric(10, 2), nullable=False, default=0)
-    cancellation_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    cancellation_date = db.Column(db.DateTime, nullable=False, default=utcnow)
     refund_status = db.Column(
         db.Enum("PENDING", "PROCESSED", "REJECTED", name="refund_status"),
         nullable=False, default=STATUS_PENDING, index=True,

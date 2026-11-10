@@ -26,7 +26,13 @@ def is_valid_phone(value: str | None) -> bool:
 
 
 def is_strong_password(value: str | None) -> bool:
-    return bool(value and len(value) >= 8 and any(c.isdigit() for c in value))
+    if not value or len(value) < 8:
+        return False
+    return (
+        any(c.isdigit() for c in value)
+        and any(c.isupper() for c in value)
+        and any(c.islower() for c in value)
+    )
 
 
 def parse_date(value: str | None):

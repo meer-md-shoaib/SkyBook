@@ -25,6 +25,7 @@ def _owned_or_404(booking_id: int):
 @bookings_bp.route("/")
 @login_required
 def my_bookings():
+    """Display all bookings associated with the currently signed-in user."""
     booking_service.expire_stale_holds()
     bookings = booking_service.repo.list_for_user(current_user.user_id)
     return render_template("my_bookings.html", bookings=bookings)
@@ -33,6 +34,7 @@ def my_bookings():
 @bookings_bp.route("/<int:booking_id>")
 @login_required
 def details(booking_id: int):
+    """View details, seat information, and cancellation eligibility for a booking."""
     booking = _owned_or_404(booking_id)
     eligible, reason = cancellation_service.eligibility(booking)
     return render_template(
@@ -47,6 +49,7 @@ def details(booking_id: int):
 @bookings_bp.route("/<int:booking_id>/passengers", methods=["GET", "POST"])
 @login_required
 def passenger_details(booking_id: int):
+    """Collect and validate identification details for each held seat."""
     booking = _owned_or_404(booking_id)
     if booking.booking_status != "PENDING":
         return redirect(url_for("bookings.details", booking_id=booking.booking_id))
@@ -114,6 +117,7 @@ def passenger_details(booking_id: int):
 @bookings_bp.route("/<int:booking_id>/summary")
 @login_required
 def summary(booking_id: int):
+    """Review booking breakdown, flight times, and fare before paying."""
     booking = _owned_or_404(booking_id)
     if len(booking.passengers) != len(booking.active_seats):
         flash("Please complete passenger details before reviewing the booking.", "warning")
@@ -124,6 +128,7 @@ def summary(booking_id: int):
 @bookings_bp.route("/<int:booking_id>/confirmation")
 @login_required
 def confirmation(booking_id: int):
+    """Booking success screen with e-ticket download link."""
     booking = _owned_or_404(booking_id)
     if booking.booking_status != "CONFIRMED":
         flash("This booking is not confirmed yet.", "warning")
@@ -134,6 +139,7 @@ def confirmation(booking_id: int):
 @bookings_bp.route("/<int:booking_id>/cancel", methods=["GET", "POST"])
 @login_required
 def cancel(booking_id: int):
+    """Quote cancellation refund and release held/booked seats upon confirmation."""
     booking = _owned_or_404(booking_id)
     eligible, reason = cancellation_service.eligibility(booking)
     quote = cancellation_service.refund_quote(booking)

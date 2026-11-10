@@ -1,5 +1,11 @@
 """Small formatting / presentation helpers used by templates and services."""
-from datetime import datetime
+from datetime import datetime, timezone
+
+
+def utcnow() -> datetime:
+    """Return current naive UTC datetime (replaces deprecated datetime.utcnow())."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
 
 
 def format_currency(amount) -> str:

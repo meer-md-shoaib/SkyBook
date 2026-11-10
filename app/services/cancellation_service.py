@@ -6,6 +6,7 @@ from flask import current_app
 from app.extensions import db
 from app.models import Booking, Cancellation, Payment
 from app.repositories.booking_repository import BookingRepository
+from app.utils.helpers import utcnow
 
 
 class CancellationError(Exception):
@@ -34,7 +35,7 @@ class CancellationService:
     @staticmethod
     def eligibility(booking: Booking) -> tuple[bool, str]:
         if booking.booking_status == Booking.STATUS_CONFIRMED:
-            if booking.schedule and booking.schedule.departure_time <= datetime.utcnow():
+            if booking.schedule and booking.schedule.departure_time <= utcnow():
                 return False, "This flight has already departed, so it cannot be cancelled."
             return True, "This booking is eligible for cancellation."
         if booking.booking_status in (Booking.STATUS_PENDING, Booking.STATUS_EXPIRED):
@@ -58,9 +59,9 @@ class CancellationService:
         cancellation = booking.cancellation or Cancellation(booking_id=booking.booking_id)
         cancellation.cancellation_reason = (reason or "Cancelled by passenger").strip()[:255]
         cancellation.refund_amount = quote["refund"]
-        cancellation.cancellation_date = datetime.utcnow()
+        cancellation.cancellation_date = utcnow()
         cancellation.refund_status = Cancellation.STATUS_PROCESSED
-        cancellation.processed_at = datetime.utcnow()
+        cancellation.processed_at = utcnow()
         db.session.add(cancellation)
 
         if booking.payment and booking.payment.payment_status == Payment.STATUS_SUCCESS:
@@ -73,10 +74,12 @@ class CancellationService:
         db.session.add(booking)
         try:
             db.session.commit()
-        except Exception:
+        except Exception as exc:
+            current_app.logger.exception("Cancellation failed: %s", exc)
             db.session.rollback()
             raise
 
         # Sanity: seats really are free again.
-        assert released >= 0
+        if released < 0:
+            raise CancellationError("Failed to release held seats.")
         return cancellation

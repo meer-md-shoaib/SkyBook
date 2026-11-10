@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_user, logout_user
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.extensions import db
 from app.forms import LoginForm, RegisterForm
@@ -33,7 +34,7 @@ def register():
             return render_template("register.html", form=form)
 
         if not is_strong_password(form.password.data):
-            flash("Password must be at least 8 characters and include a number.", "danger")
+            flash("Password must be at least 8 characters and include uppercase, lowercase, and a number.", "danger")
             return render_template("register.html", form=form)
 
         user = UserRepository.create(
@@ -44,7 +45,7 @@ def register():
         )
         try:
             db.session.commit()
-        except Exception:
+        except SQLAlchemyError:
             db.session.rollback()
             flash("We could not create your account. Please try again.", "danger")
             return render_template("register.html", form=form)
@@ -89,7 +90,7 @@ def login():
     return render_template("login.html", form=form)
 
 
-@auth_bp.route("/logout", methods=["GET", "POST"])
+@auth_bp.route("/logout", methods=["POST"])
 def logout():
     if current_user.is_authenticated:
         logout_user()

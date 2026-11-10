@@ -5,6 +5,7 @@ from sqlalchemy.orm import aliased
 
 from app.extensions import db
 from app.models import Airport, Flight, FlightSchedule, Seat
+from app.utils.helpers import utcnow
 
 
 class FlightRepository:
@@ -57,7 +58,7 @@ class FlightRepository:
                 FlightSchedule.departure_time < start + timedelta(days=1),
             )
         else:
-            query = query.filter(FlightSchedule.departure_time >= datetime.utcnow())
+            query = query.filter(FlightSchedule.departure_time >= utcnow())
         if airline:
             query = query.filter(Flight.airline_name == airline)
         if max_price:
@@ -114,7 +115,7 @@ class FlightRepository:
     def upcoming_schedules(limit: int = 8):
         return (
             FlightSchedule.query.filter(
-                FlightSchedule.departure_time >= datetime.utcnow(),
+                FlightSchedule.departure_time >= utcnow(),
                 FlightSchedule.status == FlightSchedule.STATUS_SCHEDULED,
             )
             .order_by(FlightSchedule.departure_time.asc())

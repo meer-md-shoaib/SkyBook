@@ -1,9 +1,10 @@
 """Booking and the booking-seat join table."""
 import secrets
 import string
-from datetime import datetime, timezone
+from datetime import datetime
 
 from app.extensions import db
+from app.utils.helpers import utcnow
 
 ALPHABET = string.ascii_uppercase + string.digits
 
@@ -45,9 +46,9 @@ class Booking(db.Model):
     contact_email = db.Column(db.String(120), nullable=True)
     contact_phone = db.Column(db.String(20), nullable=True)
     hold_expires_at = db.Column(db.DateTime, nullable=True, index=True)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
     updated_at = db.Column(
-        db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+        db.DateTime, nullable=False, default=utcnow, onupdate=utcnow
     )
 
     user = db.relationship("User", back_populates="bookings")
@@ -85,13 +86,13 @@ class Booking(db.Model):
     def is_hold_expired(self) -> bool:
         if self.booking_status != self.STATUS_PENDING or not self.hold_expires_at:
             return False
-        return datetime.utcnow() > self.hold_expires_at
+        return utcnow() > self.hold_expires_at
 
     @property
     def hold_seconds_remaining(self) -> int:
         if self.booking_status != self.STATUS_PENDING or not self.hold_expires_at:
             return 0
-        delta = self.hold_expires_at - datetime.utcnow()
+        delta = self.hold_expires_at - utcnow()
         return max(0, int(delta.total_seconds()))
 
     @property
@@ -99,7 +100,7 @@ class Booking(db.Model):
         return (
             self.booking_status == self.STATUS_CONFIRMED
             and self.schedule is not None
-            and self.schedule.departure_time > datetime.utcnow()
+            and self.schedule.departure_time > utcnow()
         )
 
     def __repr__(self) -> str:  # pragma: no cover
@@ -132,7 +133,7 @@ class BookingSeat(db.Model):
     active_seat_id = db.Column(db.Integer, nullable=True)
     is_active = db.Column(db.Boolean, nullable=False, default=True)
     price = db.Column(db.Numeric(10, 2), nullable=False, default=0)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
 
     booking = db.relationship("Booking", back_populates="seat_links")
     seat = db.relationship("Seat")

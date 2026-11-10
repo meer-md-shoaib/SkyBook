@@ -5,6 +5,7 @@ from flask_login import UserMixin
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.extensions import db, login_manager
+from app.utils.helpers import utcnow
 
 
 class User(UserMixin, db.Model):
@@ -25,7 +26,7 @@ class User(UserMixin, db.Model):
         index=True,
     )
     is_active_flag = db.Column("is_active", db.Boolean, nullable=False, default=True)
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, nullable=False, default=utcnow)
 
     bookings = db.relationship(
         "Booking", back_populates="user", cascade="all, delete-orphan", lazy="dynamic"

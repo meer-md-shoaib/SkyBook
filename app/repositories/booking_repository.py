@@ -5,6 +5,7 @@ from sqlalchemy import select
 
 from app.extensions import db
 from app.models import Booking, BookingSeat, Passenger, Seat
+from app.utils.helpers import utcnow
 
 
 class BookingRepository:
@@ -59,7 +60,7 @@ class BookingRepository:
     # ---- hold expiry ------------------------------------------------------
     @staticmethod
     def expired_pending_bookings(now: datetime | None = None):
-        now = now or datetime.utcnow()
+        now = now or utcnow()
         return (
             Booking.query.filter(
                 Booking.booking_status == Booking.STATUS_PENDING,

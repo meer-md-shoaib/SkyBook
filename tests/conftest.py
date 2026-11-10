@@ -11,6 +11,7 @@ from app.extensions import db
 from app.models import Booking, FlightSchedule, Seat, User
 from app.seed import seed_database
 from app.services.booking_service import BookingService
+from app.utils.helpers import utcnow
 
 
 @pytest.fixture()
@@ -63,7 +64,7 @@ def admin(app):
 def schedule(app):
     """The soonest future schedule with free seats."""
     return (
-        FlightSchedule.query.filter(FlightSchedule.departure_time > datetime.utcnow())
+        FlightSchedule.query.filter(FlightSchedule.departure_time > utcnow())
         .order_by(FlightSchedule.departure_time.asc())
         .first()
     )

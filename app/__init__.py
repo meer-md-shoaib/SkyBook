@@ -32,14 +32,14 @@ def create_app(config_name: str | None = None) -> Flask:
     def inject_globals():
         from app.utils.helpers import (
             badge_class, format_currency, format_date, format_datetime,
-            format_duration, format_time, initials,
+            format_duration, format_time, initials, utcnow,
         )
 
         return {
             "APP_NAME": app.config["APP_NAME"],
             "APP_TAGLINE": app.config["APP_TAGLINE"],
-            "current_year": datetime.utcnow().year,
-            "now": datetime.utcnow(),
+            "current_year": utcnow().year,
+            "now": utcnow(),
             "format_currency": format_currency,
             "format_time": format_time,
             "format_date": format_date,
