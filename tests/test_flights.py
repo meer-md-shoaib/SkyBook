@@ -52,3 +52,29 @@ def test_results_page_renders(client, login):
     )
     assert response.status_code == 200
     assert b"Bengaluru" in response.data
+
+
+def test_services_page_renders(client):
+    response = client.get("/services")
+    assert response.status_code == 200
+    assert b"Passenger Services" in response.data or b"Services" in response.data
+    assert b"Interactive Seat Selection" in response.data
+
+
+def test_contact_page_renders_and_submits(client):
+    get_res = client.get("/contact")
+    assert get_res.status_code == 200
+    assert b"shoaibmeermd@gmail.com" in get_res.data
+
+    post_res = client.post(
+        "/contact",
+        data={
+            "name": "Jane Traveller",
+            "email": "jane@example.com",
+            "subject": "Booking enquiry",
+            "message": "Can I upgrade my seat class?",
+        },
+        follow_redirects=True,
+    )
+    assert post_res.status_code == 200
+    assert b"shoaibmeermd@gmail.com" in post_res.data
