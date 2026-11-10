@@ -215,7 +215,7 @@ class TicketService:
         )
         c.setFillColor(NAVY)
         c.setFont("Helvetica-Bold", 8)
-        c.drawRightString(width - 20 * mm, 24 * mm, "SkyBook · support@skybook.example")
+        c.drawRightString(width - 20 * mm, 24 * mm, "SkyBook · shoaibmeermd@gmail.com")
         c.setFillColor(SKY)
         c.setFont("Helvetica", 7)
         c.drawCentredString(width / 2, 12 * mm, f"Ticket {ticket.ticket_number} · Transaction generated for booking {booking.booking_reference}")
