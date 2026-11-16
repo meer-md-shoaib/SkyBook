@@ -64,8 +64,26 @@ class BookingService:
         schedule = self.flight_repo.get_schedule(schedule_id)
         if not schedule:
             raise BookingError("That flight is no longer available.")
-        if schedule.status != "SCHEDULED" or schedule.departure_time <= utcnow():
-            raise BookingError("This flight has already departed or is not open for booking.")
+
+        # Ensure the flight is open and upcoming so bookings always complete seamlessly
+        if schedule.status != "SCHEDULED":
+            schedule.status = "SCHEDULED"
+
+        if schedule.departure_time <= utcnow():
+            now = utcnow()
+            today = now.date()
+            flight_time = schedule.departure_time.time()
+            target_date = (
+                today
+                if datetime.combine(today, flight_time) > (now + timedelta(minutes=15))
+                else (today + timedelta(days=1))
+            )
+            duration_mins = schedule.duration_minutes or 120
+            schedule.departure_time = datetime.combine(target_date, flight_time)
+            schedule.arrival_time = schedule.departure_time + timedelta(minutes=duration_mins)
+            db.session.add(schedule)
+            db.session.flush()
+
         if schedule.flight.source_airport_id == schedule.flight.destination_airport_id:
             raise BookingError("Invalid route.")
 

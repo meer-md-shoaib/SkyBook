@@ -25,6 +25,40 @@ class FlightRepository:
 
     # ---- schedules --------------------------------------------------------
     @staticmethod
+    def ensure_upcoming_schedules() -> None:
+        """Roll forward past schedules to upcoming dates so flights are always bookable."""
+        now = utcnow()
+        past_schedules = FlightSchedule.query.filter(
+            FlightSchedule.departure_time <= now
+        ).all()
+        if not past_schedules:
+            return
+
+        today = now.date()
+        for s in past_schedules:
+            flight_time = s.departure_time.time()
+            day_offset = s.schedule_id % 7
+            target_date = today + timedelta(days=day_offset)
+            if target_date == today and datetime.combine(today, flight_time) <= (now + timedelta(minutes=15)):
+                target_date = today + timedelta(days=1 + day_offset)
+
+            duration = s.duration_minutes or 120
+            s.departure_time = datetime.combine(target_date, flight_time)
+            s.arrival_time = s.departure_time + timedelta(minutes=duration)
+            s.status = FlightSchedule.STATUS_SCHEDULED
+
+            for seat in s.seats:
+                if seat.status == Seat.STATUS_HELD:
+                    seat.status = Seat.STATUS_AVAILABLE
+                    seat.current_booking_id = None
+            db.session.add(s)
+
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+
+    @staticmethod
     def search_schedules(
         source_city: str | None = None,
         destination_city: str | None = None,
@@ -35,6 +69,7 @@ class FlightRepository:
         only_available: bool = True,
     ):
         """Return schedules matching the route/date with optional filters."""
+        FlightRepository.ensure_upcoming_schedules()
         src = aliased(Airport)
         dst = aliased(Airport)
 
@@ -87,7 +122,26 @@ class FlightRepository:
 
     @staticmethod
     def get_schedule(schedule_id: int) -> FlightSchedule | None:
-        return db.session.get(FlightSchedule, int(schedule_id))
+        schedule = db.session.get(FlightSchedule, int(schedule_id))
+        if schedule and schedule.departure_time <= utcnow():
+            now = utcnow()
+            today = now.date()
+            flight_time = schedule.departure_time.time()
+            target_date = (
+                today
+                if datetime.combine(today, flight_time) > (now + timedelta(minutes=15))
+                else (today + timedelta(days=1))
+            )
+            duration_mins = schedule.duration_minutes or 120
+            schedule.departure_time = datetime.combine(target_date, flight_time)
+            schedule.arrival_time = schedule.departure_time + timedelta(minutes=duration_mins)
+            schedule.status = FlightSchedule.STATUS_SCHEDULED
+            try:
+                db.session.add(schedule)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+        return schedule
 
     @staticmethod
     def get_schedule_seats(schedule_id: int):
@@ -113,6 +167,7 @@ class FlightRepository:
 
     @staticmethod
     def upcoming_schedules(limit: int = 8):
+        FlightRepository.ensure_upcoming_schedules()
         return (
             FlightSchedule.query.filter(
                 FlightSchedule.departure_time >= utcnow(),

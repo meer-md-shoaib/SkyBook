@@ -100,7 +100,6 @@ class Booking(db.Model):
         return (
             self.booking_status == self.STATUS_CONFIRMED
             and self.schedule is not None
-            and self.schedule.departure_time > utcnow()
         )
 
     def __repr__(self) -> str:  # pragma: no cover

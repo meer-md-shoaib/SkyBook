@@ -65,6 +65,9 @@ class TestingConfig(BaseConfig):
     WTF_CSRF_ENABLED = False
     SQLALCHEMY_DATABASE_URI = _db_uri(os.getenv("TEST_DB_NAME", "skybook_test_db"))
     SEAT_HOLD_MINUTES = 10
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        "pool_pre_ping": True,
+    }
 
 
 class ProductionConfig(BaseConfig):

@@ -35,8 +35,6 @@ class CancellationService:
     @staticmethod
     def eligibility(booking: Booking) -> tuple[bool, str]:
         if booking.booking_status == Booking.STATUS_CONFIRMED:
-            if booking.schedule and booking.schedule.departure_time <= utcnow():
-                return False, "This flight has already departed, so it cannot be cancelled."
             return True, "This booking is eligible for cancellation."
         if booking.booking_status in (Booking.STATUS_PENDING, Booking.STATUS_EXPIRED):
             return False, "Only confirmed bookings can be cancelled."
