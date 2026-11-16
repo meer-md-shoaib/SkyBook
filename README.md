@@ -79,3 +79,27 @@ Traditional naive implementations suffer from critical failure modes:
 Whether running locally on XAMPP MySQL or globally on TiDB Cloud Serverless MySQL behind Render, SkyBook delivers a high-performance passenger booking experience and an administrative operations suite.
 
 ---
+
+## ✨ Key System Capabilities
+
+### 🧳 Passenger Experience
+
+- **⚡ Real-Time Flight Discovery:** Search flights by origin, destination, departure date, airline preference, fare ceilings, and departure windows (Morning, Afternoon, Evening, Night).
+- **💺 Interactive Seat Selection:** Visual seat map displaying realistic airliner layouts with distinct Business and Economy configurations, color-coded seat states (`Available`, `Selected`, `Held`, `Booked`).
+- **⏱️ 10-Minute Hold Window:** Atomic reservation timer holding selected seats for 10 minutes with client-side countdown and background automatic expiration.
+- **📋 Server-Side Passenger Validation:** Detailed identity verification supporting Aadhaar, Passport, PAN, Voter ID, and Driving License, with duplicate identity prevention.
+- **💳 Multi-Method Simulated Payment:** Strategy-pattern payment module supporting Cards and UPI with one-click outcome simulation (*Success* or *Declined Retry*).
+- **📄 Instant PDF E-Ticket Generation:** Automated ReportLab vector PDF generation with custom airline header, flight metadata, seat badges, and boarding instructions.
+- **🔄 Transparent Cancellation & Refunds:** Real-time cancellation quote calculation deducting configurable airline fee tiers (default 10%), with instantaneous seat inventory release.
+- **🌓 Adaptive Dark / Light Mode:** Fully responsive theme switcher persisting passenger preference in `localStorage` with system OS color scheme fallback.
+- **✨ Fluid UI Page Transitions:** Smooth CSS sliding transitions across routes (`/`, `/services`, `/contact`, `/flights/results`).
+
+### 🛠️ Administrator Operations
+
+- **📊 Comprehensive Command Center:** Live metrics tracking total confirmed bookings, gross revenue generated, active flights in air, and average load factor.
+- **🛫 Route & Flight Management (CRUD):** Create, inspect, update, and toggle active status for domestic and international aircraft routes.
+- **🗓️ Schedule Operations & Seat Regeneration:** Publish flight schedules with customized base fares, departure windows, and automatic 132-seat aircraft layout generator.
+- **👥 Passenger & Booking Audit Trail:** Real-time visibility into all bookings, passenger manifest records, transaction references, and processed cancellations.
+- **🔐 Role-Based Access Control:** Strict authorization boundaries enforced via custom decorators (`@admin_required`), isolating administrative routes from passenger access.
+
+---
