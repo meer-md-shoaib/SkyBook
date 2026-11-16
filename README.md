@@ -470,3 +470,46 @@ tests\test_payments.py .......                                           [100%]
 | `GET` | `/admin/cancellations`| Cancellation and refund processing history | Administrator |
 
 ---
+
+## 👥 Authors & Acknowledgments
+
+<div align="center">
+
+<table>
+  <tr>
+    <td align="center" width="100%">
+      <a href="https://github.com/meer-md-shoaib">
+        <img src="https://github.com/meer-md-shoaib.png" width="125px;" style="border-radius: 50%;" alt="Meer Mohammed Shoaib"/><br />
+        <sub><b>Meer Mohammed Shoaib</b></sub>
+      </a><br />
+      <span style="color: #0ea5e9; font-weight: bold;">Lead Software Architect & Full-Stack Engineer</span>
+      <p style="font-size: 0.85em; color: #64748b; max-width: 500px; margin-top: 6px;">
+        Core system architecture, concurrency & pessimistic seat-locking model, dynamic schedule auto-advancement engine, ReportLab PDF e-ticketing pipeline, TiDB Cloud Serverless deployment, and full test suite design.
+      </p>
+      <a href="https://github.com/meer-md-shoaib">
+        <img src="https://img.shields.io/badge/GitHub-Profile-181717?style=flat-square&logo=github" alt="GitHub" />
+      </a>
+      &nbsp;
+      <a href="mailto:shoaibmeermd@gmail.com">
+        <img src="https://img.shields.io/badge/Email-Contact%20Author-EA4335?style=flat-square&logo=gmail&logoColor=white" alt="Email" />
+      </a>
+    </td>
+  </tr>
+</table>
+
+</div>
+
+---
+
+## 📄 License & Academic Attribution
+
+This project is open-source software licensed under the **[MIT License](LICENSE)**.
+
+> **Academic Presentation Artifacts:** For university reviews, software design defenses, and system demonstrations, refer to **[`SkyBook_SDD_Presentation_Fixed.pptx`](SkyBook_SDD_Presentation_Fixed.pptx)** for the complete slide deck containing architectural diagrams, test logs, and live application screenshots.
+
+<br/>
+
+<div align="center">
+  <b>Built with ❤️ by Meer Mohammed Shoaib</b><br/>
+  <sub>© 2026 SkyBook Airline Reservation System. All rights reserved.</sub>
+</div>
