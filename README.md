@@ -1,6 +1,6 @@
 <div align="center">
 
-# ✈️ SkyBook — Modern Airline Reservation & Operations Platform
+# SkyBook — Modern Airline Reservation & Operations Platform ✈️
 ### *Seamless Journeys. Bulletproof Concurrency. Effortless Flight Management.*
 
 **A full-stack, enterprise-grade airline booking and flight operations system engineered with Flask, SQLAlchemy, MySQL / TiDB Cloud, and Bootstrap 5 — featuring ACID-compliant seat holds, dynamic schedule advancement, simulated payment gateways, and automated PDF e-ticketing.**
@@ -21,7 +21,7 @@
 
 <!-- Interactive Quick Action Buttons -->
 <p align="center">
-  <a href="https://github.com/meer-md-shoaib/SkyBook">
+  <a href="https://skybook-czmd.onrender.com/">
     <img src="https://img.shields.io/badge/🚀_Live_App-Visit_SkyBook-0B2A4A?style=for-the-badge&labelColor=17324D" alt="Live App" />
   </a>
   &nbsp;&nbsp;
@@ -510,6 +510,6 @@ This project is open-source software licensed under the **[MIT License](LICENSE)
 <br/>
 
 <div align="center">
-  <b>Built with ❤️ by Meer Mohammed Shoaib</b><br/>
+  <b>Built by Team 2: Meer Mohammed Shoaib, Shivkumar Bheemappa Her, Mithun B R, Yogesh Gowda M C, Sohil </b><br/>
   <sub>© 2026 SkyBook Airline Reservation System. All rights reserved.</sub>
 </div>
