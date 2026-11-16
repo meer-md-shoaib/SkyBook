@@ -390,3 +390,39 @@ Access the application in your browser at: **`http://127.0.0.1:5000`**
 | **Demo Passenger 2** | `riya@example.com` | `Passenger@123` | Multi-passenger and concurrent booking simulation account |
 
 ---
+
+## 🧪 Automated Testing & Quality Assurance
+
+SkyBook maintains a comprehensive, production-grade test suite covering domain services, transactional concurrency, security boundaries, and HTTP route handlers.
+
+```bash
+# Run the entire test suite with verbose output
+python -m pytest -v
+```
+
+```
+============================= test session starts =============================
+platform win32 -- Python 3.13.15, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\meerm\Freebuff\SkyBook
+collected 42 items
+
+tests\test_auth.py ...........                                           [ 26%]
+tests\test_bookings.py ..........                                        [ 50%]
+tests\test_cancellations.py .....                                        [ 61%]
+tests\test_flights.py .........                                          [ 83%]
+tests\test_payments.py .......                                           [100%]
+
+============================= 42 passed in 55.94s =============================
+```
+
+### 📋 Test Coverage Matrix
+
+| Test Module | Tests | Primary Verification Focus |
+|---|:---:|---|
+| **`test_auth.py`** | 11 | Registration validation, secure password hashing, session lifecycle, role-based access control, CSRF protections, unauthorized redirects. |
+| **`test_flights.py`** | 9 | Route search queries, same-city validation, date clamping, price filtering, departure window matching, standalone `/services` & `/contact` views. |
+| **`test_bookings.py`** | 10 | Atomic seat holds, duplicate seat rejection, max seat limits (6 per booking), passenger manifest data validation, expired hold sweepers, ownership protection. |
+| **`test_payments.py`** | 7 | Strategy-pattern payment charge, simulated gateway failure and retry, booking confirmation, ReportLab PDF ticket generation, payment callback idempotency. |
+| **`test_cancellations.py`** | 5 | Cancellation eligibility checks, 10% fee calculation, seat inventory release, double-cancellation prevention, confirmation prompts. |
+
+---
