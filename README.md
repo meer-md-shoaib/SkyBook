@@ -151,3 +151,67 @@ In real-world testing and academic presentations, static demo databases frequent
 2. **Catalog Health Sweeper (`ensure_upcoming_schedules()`):** On flight searches and landing page requests, expired schedules are cycled forward across a 7-day rolling window, resetting held seats and ensuring flight discovery never returns empty routes.
 
 ---
+
+## 🏗️ System Architecture & Workflow
+
+SkyBook follows a clean, decoupled **Layered Architecture (N-Tier)** enforcing strict separation of concerns across presentation, domain business logic, data persistence, and database layers:
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        Presentation Layer (UI)                         │
+│   Bootstrap 5.3 + Jinja2 Templates + Vanilla JS + CSS3 Theme Engine    │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ HTTP Requests / Form Data
+┌───────────────────────────────────▼────────────────────────────────────┐
+│                       Controller / Route Layer                         │
+│   auth_bp | main_bp | flights_bp | bookings_bp | payments_bp | admin_bp│
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ Validated Payloads
+┌───────────────────────────────────▼────────────────────────────────────┐
+│                        Domain & Service Layer                          │
+│   BookingService │ FlightService │ PaymentService │ TicketService      │
+│   - Hold Sweeper │ - Fares Quote │ - Strategy GW  │ - ReportLab PDF    │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ ORM Queries & Locking
+┌───────────────────────────────────▼────────────────────────────────────┐
+│                       Repository & Data Access                         │
+│   BookingRepository │ FlightRepository │ UserRepository                │
+│   - SELECT ... FOR UPDATE              │ - Atomic Transactions         │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    │ SQL Execution
+┌───────────────────────────────────▼────────────────────────────────────┐
+│                        Database & Storage Layer                        │
+│         MySQL 8.0+ / MariaDB 10.4 / TiDB Cloud Serverless              │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+### 🧩 Software Design Patterns
+
+| Pattern | Component | Description & Purpose |
+|---|---|---|
+| **Application Factory** | `app.create_app()` | Isolates configurations across `development`, `testing`, and `production`. Enables clean pytest fixture creation. |
+| **Repository Pattern** | `app.repositories.*` | Decouples business services from direct SQLAlchemy queries, centralizing complex SQL logic and row-level locks. |
+| **Strategy Pattern** | `app.services.payment_service` | Implements `PaymentStrategy` with interchangeable concrete classes (`MockSuccessStrategy`, `MockFailureStrategy`) for extensible payment gateways. |
+| **Decorator Pattern** | `app.utils.decorators` | Implements `@admin_required` and custom authentication guards cleanly wrapping route endpoints. |
+| **State Pattern** | `Booking.booking_status` | Enforces explicit, valid transitions across `PENDING ➔ CONFIRMED ➔ CANCELLED` and `PENDING ➔ EXPIRED`. |
+
+---
+
+## 🛠️ Technology Stack
+
+| Layer | Component | Version | Purpose |
+|---|---|---|---|
+| **Backend Framework** | Flask | 3.1.x | Lightweight WSGI web application framework and routing engine |
+| **Language** | Python | 3.11 – 3.13 | Core programming language with typed signatures and clean exception handling |
+| **ORM & Data Mapping** | SQLAlchemy | 2.0.x | Object-Relational Mapper providing transactional Unit of Work and connection pooling |
+| **Database Driver** | PyMySQL | 1.1.x | Pure-Python MySQL client driver supporting SSL/TLS connections for TiDB Cloud |
+| **Primary Database** | MySQL / TiDB | 8.0 / v8.5 | Relational ACID database with row-level locking (Local MySQL / Cloud Serverless) |
+| **Authentication** | Flask-Login | 0.6.x | Session-based user authentication, remember-me cookies, and credential verification |
+| **Forms & Security** | Flask-WTF / CSRF | 1.2.x | Form validation, password policy enforcement, and synchronized CSRF token protection |
+| **Document Engine** | ReportLab | 4.3.x | Enterprise PDF rendering engine generating vector airline e-tickets and boarding passes |
+| **Frontend Styling** | Bootstrap | 5.3.3 | Modern responsive grid system, modals, badges, and accessible forms |
+| **Icons & Visuals** | Bootstrap Icons | 1.11.x | Consistent iconography across navigation, admin metrics, and seat maps |
+| **Testing Suite** | Pytest | 9.1.x | Automated unit, service, integration, and security test runner (42 tests) |
+| **Cloud Deployment** | Render | Native | Production cloud web service with automatic deployment pipeline from GitHub `main` |
+
+---
