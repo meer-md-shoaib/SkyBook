@@ -61,3 +61,21 @@
 - [📄 License & Ethics](#-license--ethics)
 
 ---
+
+## 💡 Overview & The Engineering Challenge
+
+Modern commercial airline reservation platforms process millions of concurrent queries and seat reservations across global flight networks. The primary engineering challenge lies in **preventing double-bookings**, guaranteeing **data consistency under high contention**, and providing **instant booking confirmation** with valid electronic boarding documentation.
+
+Traditional naive implementations suffer from critical failure modes:
+- **Race Conditions:** Two passengers simultaneously selecting seat `14B` on a high-demand route both receive confirmation because status updates occur after isolated query reads.
+- **Abandoned Cart Seat Locking:** Incomplete booking flows hold seats indefinitely, causing flights to artificially appear fully booked and inflicting severe airline revenue loss.
+- **Stale Schedule Breakages:** Pre-seeded flights pass departure thresholds, causing reservation exceptions when passengers search for domestic journeys.
+- **Inconsistent Financial Reconciliations:** Payment failures leave orphaned records, while un-audited cancellations fail to properly compute airline refund tiers.
+
+### 🎯 Our Mission: SkyBook
+
+**SkyBook** solves these core airline domain challenges by combining **pessimistic row-level locking (`SELECT ... FOR UPDATE`)**, a **dual-state seat reservation model** with a **unique constraint on active holds**, a **self-healing dynamic schedule engine**, and a **Strategy-pattern simulated payment gateway**.
+
+Whether running locally on XAMPP MySQL or globally on TiDB Cloud Serverless MySQL behind Render, SkyBook delivers a high-performance passenger booking experience and an administrative operations suite.
+
+---
