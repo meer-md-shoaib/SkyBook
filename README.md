@@ -215,3 +215,83 @@ SkyBook follows a clean, decoupled **Layered Architecture (N-Tier)** enforcing s
 | **Cloud Deployment** | Render | Native | Production cloud web service with automatic deployment pipeline from GitHub `main` |
 
 ---
+
+## 📂 Project Directory Tree
+
+```
+SkyBook/
+├── app/
+│   ├── __init__.py                # Flask application factory, CLI registration, context processors
+│   ├── config.py                  # Environment-driven configuration (Dev, Testing, Prod)
+│   ├── extensions.py              # Initialized extensions: db (SQLAlchemy), login_manager, csrf
+│   ├── forms.py                   # Passenger and Admin forms with WTForms validators
+│   ├── seed.py                    # Multi-route domestic seeder (36 flights, 360 schedules, 47k seats)
+│   ├── models/                    # 10 Normalized SQLAlchemy Database Models
+│   │   ├── airport.py             # IATA codes, international airport names, cities
+│   │   ├── flight.py              # Aircraft types, airlines, active route status
+│   │   ├── schedule.py            # Timetables, duration, status (SCHEDULED, DEPARTED)
+│   │   ├── seat.py                # Seat classes (BUSINESS, ECONOMY), row-column coordinates
+│   │   ├── user.py                # User credentials, roles (ADMIN, PASSENGER), hashed passwords
+│   │   ├── booking.py             # PNR references, hold timers, total amounts, booking statuses
+│   │   ├── passenger.py           # Government ID validations, dates of birth, assigned seats
+│   │   ├── payment.py             # Transaction references, payment methods, gateway messages
+│   │   ├── ticket.py              # E-ticket references, generation timestamps, PDF file paths
+│   │   └── cancellation.py        # Refund amounts, cancellation fees, cancellation reasons
+│   ├── repositories/              # Database Query & Locking Layer
+│   │   ├── booking_repository.py  # Row-level seat locking (SELECT FOR UPDATE), hold sweepers
+│   │   ├── flight_repository.py   # Route search, catalog queries, auto-advancement health sweeper
+│   │   └── user_repository.py     # User lookup and role querying
+│   ├── services/                  # Core Business Logic Layer
+│   │   ├── booking_service.py     # Atomicity manager: holds, passenger mapping, confirmation
+│   │   ├── flight_service.py      # Route search validation, seat-map projection
+│   │   ├── payment_service.py     # Strategy pattern simulated payment processing
+│   │   ├── ticket_service.py      # Vector ReportLab PDF electronic ticket generator
+│   │   └── cancellation_service.py# Refund quote calculation and seat inventory release
+│   ├── routes/                    # Modular Blueprint Controllers
+│   │   ├── auth.py                # User registration, login, logout, session persistence
+│   │   ├── main.py                # Landing page, `/services` showcase, `/contact` support
+│   │   ├── flights.py             # Search results, flight details, interactive seat maps
+│   │   ├── bookings.py            # Hold creation, passenger details, booking summary, cancellation
+│   │   ├── payments.py            # Checkout screen, payment execution, gateway retry
+│   │   ├── tickets.py             # PDF download endpoint with owner/admin authorization
+│   │   └── admin.py               # Administrative command console (CRUD flights, schedules, audits)
+│   ├── static/                    # Frontend Assets
+│   │   ├── css/style.css          # SkyBook custom styling & responsive CSS variables
+│   │   ├── js/main.js             # Theme switcher, seat selection engine, hold countdown timer
+│   │   └── images/                # Airplane vectors, brand badges, hero graphics
+│   ├── templates/                 # Jinja2 Frontend Templates
+│   │   ├── base.html              # Core layout, navigation bar, dark mode toggle, alerts
+│   │   ├── index.html             # Hero search bar, featured domestic routes, services highlights
+│   │   ├── flights.html           # Filterable search results list with live fare comparisons
+│   │   ├── seats.html             # Interactive aircraft cabin seat map
+│   │   ├── passenger_details.html # Dynamic passenger identification capture form
+│   │   ├── booking_summary.html   # Final fare review and flight summary before payment
+│   │   ├── payment.html           # Simulated Card & UPI checkout interface
+│   │   ├── confirmation.html      # Success screen with instant PDF ticket download link
+│   │   ├── my_bookings.html       # Passenger booking history and status tracker
+│   │   ├── booking_details.html   # Detailed booking review with cancellation quote modal
+│   │   ├── cancellation.html      # Cancellation confirmation and refund receipt
+│   │   ├── services.html          # Cabin class amenities showcase (Business, Premium, Economy)
+│   │   ├── contact.html           # 24/7 Customer assistance and feedback form
+│   │   └── admin/                 # Dedicated admin layout, dashboard, schedules, manifest views
+│   └── utils/                     # Formatting, decorators, and validators
+├── database/                      # Raw SQL Backups & Seeding Scripts
+│   ├── schema.sql                 # Complete MySQL schema DDL
+│   └── seed.sql                   # Raw SQL dataset backup
+├── docs/                          # System Architecture Documentation
+│   └── design.md                  # Detailed Software Design Document (SDD)
+├── tests/                         # Comprehensive Pytest Suite (42 tests)
+│   ├── conftest.py                # Seeded testing fixtures & test clients
+│   ├── test_auth.py               # Authentication & session security tests
+│   ├── test_flights.py            # Search engine & date clamping tests
+│   ├── test_bookings.py           # Concurrency, seat hold, & passenger validation tests
+│   ├── test_payments.py           # Payment strategy, retry, & idempotency tests
+│   └── test_cancellations.py      # Cancellation eligibility & refund formula tests
+├── SkyBook_SDD_Presentation.pptx  # Academic presentation slide deck
+├── SkyBook_SDD_Presentation_Fixed.pptx # Enhanced presentation deck with screenshots & test logs
+├── requirements.txt               # Locked production dependencies
+├── run.py                         # WSGI entry point
+└── README.md                      # Comprehensive project documentation
+```
+
+---
