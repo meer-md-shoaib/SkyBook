@@ -426,3 +426,47 @@ tests\test_payments.py .......                                           [100%]
 | **`test_cancellations.py`** | 5 | Cancellation eligibility checks, 10% fee calculation, seat inventory release, double-cancellation prevention, confirmation prompts. |
 
 ---
+
+## 📡 Application Routes & API Reference
+
+### 🌐 Passenger & Public Endpoints
+
+| Method | Endpoint | Description | Auth Required |
+|---|---|---|:---:|
+| `GET` | `/` | SkyBook home landing page with search bar and featured routes | No |
+| `GET` | `/services` | Cabin class showcase and onboard amenities guide | No |
+| `GET`, `POST` | `/contact` | Customer support ticketing and inquiry submission | No |
+| `GET`, `POST` | `/auth/login` | Passenger and administrator sign-in | No |
+| `GET`, `POST` | `/auth/register` | New passenger account registration | No |
+| `GET` | `/auth/logout` | Session termination and cookie invalidation | Yes |
+| `GET` | `/flights/results` | Multi-filter flight schedule search results | No |
+| `GET` | `/flights/<id>` | Comprehensive flight timetable and aircraft details | No |
+| `GET` | `/flights/<id>/seats` | Interactive cabin layout and seat selection interface | Yes |
+| `POST` | `/flights/<id>/seats/hold` | Atomic seat hold reservation with 10-minute timer | Yes |
+| `GET` | `/flights/<id>/availability`| Live JSON endpoint for seat availability polling | No |
+| `GET` | `/bookings/` | Passenger booking history dashboard | Yes |
+| `GET` | `/bookings/<id>` | Detailed booking overview and cancellation quote modal | Yes |
+| `GET`, `POST` | `/bookings/<id>/passengers` | Passenger identity information capture form | Yes |
+| `GET` | `/bookings/<id>/summary` | Final fare breakdown and flight itinerary review | Yes |
+| `GET` | `/bookings/<id>/confirmation`| Booking confirmation screen with e-ticket link | Yes |
+| `GET`, `POST` | `/bookings/<id>/cancel` | Cancellation review, fee calculation, and seat release | Yes |
+| `GET` | `/payments/<id>` | Simulated checkout screen with Card and UPI selectors | Yes |
+| `POST` | `/payments/<id>/pay` | Process simulated payment (Strategy pattern) | Yes |
+| `POST` | `/payments/<id>/retry` | Retry failed transaction while seat hold remains active | Yes |
+| `POST` | `/payments/callback` | Idempotent webhook receiver for gateway updates | No (CSRF exempt) |
+| `GET` | `/tickets/<id>/download` | Secure PDF electronic ticket streaming endpoint | Yes (Owner/Admin) |
+
+### 🛡️ Administrator Endpoints (`/admin/*`)
+
+| Method | Endpoint | Description | Access Level |
+|---|---|---|:---:|
+| `GET` | `/admin/` | Operations dashboard: revenue, active flights, load factor | Administrator |
+| `GET`, `POST` | `/admin/flights` | Flight inventory listing and new aircraft route creation | Administrator |
+| `POST` | `/admin/flights/<id>/toggle` | Toggle route status between Active and Inactive | Administrator |
+| `GET`, `POST` | `/admin/schedules` | Schedule timetables and automatic seat layout generator | Administrator |
+| `GET` | `/admin/bookings` | System-wide booking records and passenger counts | Administrator |
+| `GET` | `/admin/passengers` | Passenger manifest records and government ID references | Administrator |
+| `GET` | `/admin/payments` | Financial audit ledger of all transaction attempts | Administrator |
+| `GET` | `/admin/cancellations`| Cancellation and refund processing history | Administrator |
+
+---
