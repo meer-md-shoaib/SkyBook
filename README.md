@@ -295,3 +295,98 @@ SkyBook/
 ```
 
 ---
+
+## 🚀 Quickstart & Local Setup
+
+### 1. Prerequisites
+
+- **Python:** `3.11` to `3.13`
+- **Database:** Local MySQL / MariaDB (e.g. XAMPP) or a free [TiDB Cloud Serverless](https://tidbcloud.com) cluster.
+- **Git** installed on your system.
+
+### 2. Clone the Repository
+
+```bash
+git clone https://github.com/meer-md-shoaib/SkyBook.git
+cd SkyBook
+```
+
+### 3. Set Up Virtual Environment
+
+```bash
+# Windows
+python -m venv .venv
+.venv\Scripts\activate
+
+# macOS / Linux
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 4. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 5. Database Configuration
+
+Create a `.env` file in the root directory by copying `.env.example`:
+
+```bash
+cp .env.example .env
+```
+
+#### Option A: Local MySQL / XAMPP
+```env
+FLASK_ENV=development
+SECRET_KEY=skybook-local-dev-secret-key-2026
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=skybook_db
+SEAT_HOLD_MINUTES=10
+CANCELLATION_FEE_PERCENT=10
+```
+
+#### Option B: TiDB Cloud Serverless MySQL
+```env
+FLASK_ENV=production
+SECRET_KEY=skybook-prod-secret-key-live-2026
+DATABASE_URL=mysql+pymysql://<user>:<password>@gateway01.us-east-1.prod.aws.tidbcloud.com:4000/skybook_db?ssl_verify_cert=true
+SEAT_HOLD_MINUTES=10
+CANCELLATION_FEE_PERCENT=10
+```
+
+### 6. Initialize & Seed Database
+
+SkyBook comes with custom Flask CLI commands to create all schemas and seed realistic domestic Indian flight networks (IndiGo, Air India, Vistara, Akasa Air, SpiceJet across Delhi, Mumbai, Bengaluru, Hyderabad, Chennai, Kochi):
+
+```bash
+# Initialize schema and seed 36 flights with full seat layouts
+flask --app run.py init-db
+flask --app run.py seed-db
+```
+
+> **Pro-Tip:** Run `flask --app run.py reset-db` at any time to drop all tables, recreate schemas, and re-seed clean data in one step!
+
+### 7. Run the Application
+
+```bash
+python run.py
+```
+
+Access the application in your browser at: **`http://127.0.0.1:5000`**
+
+---
+
+### 🔑 Demo User Credentials
+
+| Role | Email | Password | Privileges |
+|---|---|---|---|
+| **Administrator** | `admin@skybook.com` | `Admin@123` | Full access to `/admin` dashboard, flight CRUD, schedule management, manifest audits |
+| **Demo Passenger 1** | `demo@skybook.com` | `Passenger@123` | Search, hold seats, simulated checkout, PDF e-ticket download, cancellation quotes |
+| **Demo Passenger 2** | `riya@example.com` | `Passenger@123` | Multi-passenger and concurrent booking simulation account |
+
+---
