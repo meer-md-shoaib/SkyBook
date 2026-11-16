@@ -103,3 +103,51 @@ Whether running locally on XAMPP MySQL or globally on TiDB Cloud Serverless MySQ
 - **🔐 Role-Based Access Control:** Strict authorization boundaries enforced via custom decorators (`@admin_required`), isolating administrative routes from passenger access.
 
 ---
+
+## 🛡️ High-Concurrency & ACID Guarantees
+
+In airline reservation systems, seat booking conflicts represent the highest risk to business operations. SkyBook implements a multi-tier defense architecture to ensure that **no two passengers can ever hold or book the same seat simultaneously**.
+
+```
+   Passenger 1                              Database (InnoDB)                          Passenger 2
+        |                                           |                                       |
+        |--- 1. POST /flights/12/seats/hold ------->|                                       |
+        |    seat_ids: [14A, 14B]                   |                                       |
+        |                                           |--- 2. POST /flights/12/seats/hold --->|
+        |                                           |    seat_ids: [14B, 14C]               |
+        |                                           |                                       |
+        |    [Acquires SELECT ... FOR UPDATE]       |    [BLOCKED: Waiting for Lock]        |
+        |    Status: AVAILABLE -> HELD              |                                       |
+        |    Inserts active_seat_id (UNIQUE)        |                                       |
+        |    Creates PENDING Booking (10 min hold)  |                                       |
+        |    COMMIT Transaction                     |                                       |
+        |<-- Returns 302 /passengers ---------------|                                       |
+        |                                           |    [Lock Acquired by Passenger 2]     |
+        |                                           |    Detects seat 14B status != AVAIL   |
+        |                                           |    ROLLBACK Transaction               |
+        |                                           |<-- Returns 400 Seat Just Taken -------|
+```
+
+### 1. Pessimistic Row-Level Locking (`SELECT ... FOR UPDATE`)
+When seats are requested, `BookingRepository.lock_seats_for_update()` requests exclusive row locks on the requested `seats` rows inside an active database transaction. Any concurrent request for those exact seat IDs blocks until the first transaction completes.
+
+### 2. Dual-Layer Unique Constraint (`uq_active_seat`)
+The `booking_seats` table maintains an `active_seat_id` column alongside `seat_id`:
+- When a booking holds or confirms a seat, `active_seat_id` stores the `seat_id`.
+- The database enforces a `UNIQUE(active_seat_id)` constraint.
+- If two processes ever bypassed application locks, the database engine itself rejects the collision with an `IntegrityError`.
+- Upon cancellation or expiration, `active_seat_id` is set to `NULL` (which MySQL allows multiple times), preserving historical audit logs while instantly unlocking the physical seat.
+
+### 3. Background Sweeper & Opportunistic Expiration
+Pending holds automatically expire after `SEAT_HOLD_MINUTES = 10`. To avoid costly daemon threads, SkyBook utilizes **opportunistic sweeping**: before every search, seat map render, and payment attempt, stale holds are detected (`hold_expires_at < utcnow()`) and their seats atomically set back to `AVAILABLE`.
+
+---
+
+## 🔄 Dynamic Flight Schedule Engine
+
+In real-world testing and academic presentations, static demo databases frequently decay as dates advance into the past. SkyBook includes an autonomous **Schedule Health Engine**:
+
+1. **Auto-Advancement on Booking:** When any flight is selected whose departure timestamp is in the past, SkyBook shifts its departure time to an active upcoming window (today if hours remain, or tomorrow) while strictly preserving flight duration, aircraft model, and route metadata.
+2. **Catalog Health Sweeper (`ensure_upcoming_schedules()`):** On flight searches and landing page requests, expired schedules are cycled forward across a 7-day rolling window, resetting held seats and ensuring flight discovery never returns empty routes.
+
+---
